@@ -1,0 +1,14 @@
+{
+  "name": "@eovui/base",
+  "version": "0.0.1",
+  "description": "",
+  "main": "./dist/index.js",
+  "types": "./dist/tsc/index.d.ts",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "webpack serve --config ./../../webpack.dev.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
