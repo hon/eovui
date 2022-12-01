@@ -1,4 +1,5 @@
 packages:
-  - 'charts/*'
-  - 'uis/*'
+  - 'base/*'
+  - 'pro/*'
   - 'libs/*'
+  - 'integrations/*'
