@@ -1,2 +1,1 @@
-{"/Users/hon/code/work/projects/eovui/base/web/src/sum.ts": {"path":"/Users/hon/code/work/projects/eovui/base/web/src/sum.ts","statementMap":{"0":{"start":{"line":2,"column":2},"end":{"line":2,"column":15}}},"fnMap":{"0":{"name":"sum","decl":{"start":{"line":1,"column":16},"end":{"line":1,"column":19}},"loc":{"start":{"line":1,"column":35},"end":{"line":3,"column":1}},"line":1}},"branchMap":{},"s":{"0":3},"f":{"0":3},"b":{},"_coverageSchema":"1a1c01bbd47fc00a2c39e90264f33305004495a9","hash":"d865dbe0dd8c75a84f4cb235cf8192a952992abe"}
-}
+{}

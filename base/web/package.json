@@ -5,7 +5,7 @@
   "main": "./dist/index.js",
   "types": "./dist/tsc/index.d.ts",
   "scripts": {
-    "test": "jest --config=./../../jest.config.js",
+    "test": "jest --watch --config=./../../jest.config.js",
     "dev": "webpack serve --config ./../../webpack.dev.js"
   },
   "keywords": [],

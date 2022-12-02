@@ -19,7 +19,7 @@ module.exports = {
     // default assets path and name
     assetModuleFilename: 'assets/[name][ext]',
     library: {
-      // window.shuiRating
+      // 输出window.shuiRating
       //name: "shuiRating",
       type: "module"
     },
