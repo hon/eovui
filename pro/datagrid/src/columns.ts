@@ -1,7 +1,7 @@
 /**
  * Type of row value
  */
-type ColumnTypes = 'number' | 'string'
+type ColumnType = 'number' | 'string'
 
 /**
  * Column item
@@ -9,7 +9,7 @@ type ColumnTypes = 'number' | 'string'
 interface Column {
   name: string,
   id: string,
-  type: ColumnTypes,
+  type: ColumnType,
 
   // sortable of coresponding rows
   sortable: boolean,
@@ -24,6 +24,8 @@ interface Column {
 export default class Columns {
 
   columnList: Column[]
+
+  visable: boolean
 
   constructor() {}
 

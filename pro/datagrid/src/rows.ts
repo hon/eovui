@@ -7,11 +7,12 @@ interface Row{
 }
 
 export default class Rows {
+  rows: Row[]
 
   constructor() {}
 
   /**
-   * Add one or some columns after the column list
+   * Add one or some  rows after the row lists
    */
   add(items: Row | Row[]) {}
 
