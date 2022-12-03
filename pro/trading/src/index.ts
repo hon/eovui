@@ -1,1 +1,1 @@
-console.log('eovui trading chart')
+console.log('eovui-trading chart')

@@ -5,6 +5,7 @@
     "declaration": true,
     "module": "es6",
     "target": "es2015",
+    "lib": ["ES2019", "DOM"],
     "jsx": "react",
     "sourceMap": true,
     "allowJs": true,
