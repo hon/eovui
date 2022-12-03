@@ -1,5 +1,6 @@
 import { PluginManager, OptionType, IPlugin} from './plugin'
 import MyFirstPlugin from './plugins/my-first-plugin';
+import View from './view';
 
 export default class DataGrid {
   private plugins: PluginManager
@@ -8,10 +9,15 @@ export default class DataGrid {
     this.plugins = new PluginManager();
   }
 
+  render(mount: HTMLElement) {
+    const view = new View()
+    mount.append(view.el)
+  }
+
   /**
    * Register a plugin
    */
-  registerPlugin<T>(plugin: IPlugin, options: OptionType) {
+  registerPlugin(plugin: IPlugin, options: OptionType) {
     plugin.init(this, options)
     this
       .plugins
@@ -25,3 +31,4 @@ const dg = new DataGrid({})
 
 // register `my-first-plugin`
 dg.registerPlugin(new MyFirstPlugin('my-first-plugin'), {})
+dg.render(document.body)
