@@ -3,14 +3,37 @@
 <head>
   <meta charset="UTF-8">
   <title>Eovui Trading Chart</title>
-  <style>
-    *{
-      padding: 0;
-      margin: 0;
-    }
-  </style>
 </head>
 <body>
+  <div class="main">
+  <div class="config">
+    <label for="symbol">
+      <span>
+        Symbol:
+      </span>
+      <input name="symbol" value="301060" id="symbol" type="text">
+    </label>
+    <label for="size">
+      <span>
+        Limit:
+      </span>
+      <input name="size" value="80" type="number" id="size" min="10">
+    </label>
+    <button type="button" id="load-data">加载</button>
+  </div>
+
+  <div>
+    <canvas id="canvas1" width="800" height="600"></canvas>
+  </div>
+  <div class="actions">
+    <button id="zoom-out">+</button>
+    <button id="zomm-in">-</button>
+    <button id="prev"><</button>
+    <button id="next">></button>
+    <button id="refresh">🔄</button>
+  </div>
+</div>
+
 </body>
 </html>
 
