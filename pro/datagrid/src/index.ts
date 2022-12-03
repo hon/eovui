@@ -4,6 +4,7 @@ import View from './view';
 
 export default class DataGrid {
   private plugins: PluginManager
+  private view: View
 
   constructor(options: Object) {
     this.plugins = new PluginManager();
@@ -11,6 +12,7 @@ export default class DataGrid {
 
   render(mount: HTMLElement) {
     const view = new View()
+    this.view = view
     mount.append(view.el)
   }
 

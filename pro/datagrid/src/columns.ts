@@ -6,24 +6,24 @@ type ColumnType = 'number' | 'string'
 /**
  * Column item
  */
-interface Column {
+interface IColumn {
   name: string,
-  id: string,
-  type: ColumnType,
+  id?: string,
+  type?: ColumnType,
 
   // sortable of coresponding rows
-  sortable: boolean,
+  sortable?: boolean,
 
   // drag to rearrange the order of the columns
-  dragable: boolean,
+  dragable?: boolean,
 
   // frozen
-  frozen: boolean,
+  frozen?: boolean,
 }
 
 export default class Columns {
 
-  columnList: Column[]
+  columnList: IColumn[]
 
   visable: boolean
 
@@ -32,25 +32,27 @@ export default class Columns {
   /**
    * Add one or some columns after the column list
    */
-  add(items: Column | Column[]) {}
+  add(items: IColumn | IColumn[] | string | string[]) {
+
+  }
 
 
   /**
-   * Insert on or some columns after a column by index 
+   * Insert on or some columns before a column by index 
    *
-   * @param {number}      index  - column index
    * @param {Column}      column - the column object
+   * @param {number}      index  - column index
    * @returns {Columns}
    */
-  insertAfterByIndex(index: number, column: Column): Columns {
+  insertBeforeByIndex(column: IColumn, index?: number): Columns {
     return this
   }
-  insertAfterById(id: string, column: Column) {}
-  insertFirst(column: Column) {}
+  insertBeforeById(column: IColumn, id?: string) {}
 
   removeById(id: string): boolean {
     return false
   }
+
   removeByIndex(): boolean {
     return false
 
@@ -60,4 +62,9 @@ export default class Columns {
   updateByIndex() {}
 }
 
-
+export class Column implements IColumn {
+  name: string
+  constructor(name: string) {
+    this.name = name
+  }
+}

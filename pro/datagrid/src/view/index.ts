@@ -1,3 +1,4 @@
+import '../assets/style/index.scss'
 export default class View {
   el: HTMLElement
   gridHead: GridHead
@@ -11,6 +12,7 @@ export default class View {
 
   init() {
     const el = document.createElement('div')
+    el.classList.add('eovui-datagrid-container')
     
     this.el = el 
 
@@ -27,7 +29,9 @@ export default class View {
     this.el.append(this.gridFooter.el)
     
     // Grid sidebar
-    this.gridSidebar = new GridSidebar()
+    const gridSidebar = new GridSidebar()
+    gridSidebar.hide()
+    this.gridSidebar = gridSidebar
     this.el.append(this.gridSidebar.el)
 
   }
@@ -43,6 +47,7 @@ class GridHead {
 
   init() {
     const el = document.createElement('div')
+    el.classList.add('eovui-datagrid-head')
     el.innerHTML = 'This is the grid head.'
 
     this.el = el
@@ -58,6 +63,7 @@ class GridBody {
 
   init() {
     const el = document.createElement('div')
+    el.classList.add('eovui-datagrid-body')
     el.innerHTML = 'This is the grid body.'
 
     this.el = el
@@ -73,9 +79,14 @@ class GridFooter {
 
   init() {
     const el = document.createElement('div')
+    el.classList.add('eovui-datagrid-footer')
     el.innerHTML = 'This is the grid footer.'
 
     this.el = el
+  }
+
+  hide() {
+    this.el.style.display = 'none'
   }
 
 
@@ -89,9 +100,13 @@ class GridSidebar {
 
   init() {
     const el = document.createElement('div')
+    el.classList.add('eovui-datagrid-sidebar')
     el.innerHTML = 'This is the grid sidebar.'
 
     this.el = el
+  }
+  hide() {
+    this.el.style.display = 'none'
   }
 
 }
