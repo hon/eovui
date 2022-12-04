@@ -1,9 +1,6 @@
 import DataItem, { IDataItem } from "./DataItem"
-import { mergeDeep } from './helpers'
+import options, { OptionType } from './utils/options'
 
-type OptionType = {
-  [key: string]: any
-}
 
 /**
  * 连续数据 
@@ -182,7 +179,7 @@ export default class DataSerise{
 export class ViewOnData {
   // 数据总长度
   #totalDataLength
-  opts: any
+  options: OptionType
   totalWidth: number
   indexRange: any
   zoomNum: number
@@ -190,8 +187,8 @@ export class ViewOnData {
   zoomDirection: any
 
 
-  constructor(opts: any) {
-    const defOpts = {
+  constructor(options: OptionType) {
+    const defaultOptions = {
       // 总数据的长度
       totalDataLength: 0,
 
@@ -201,16 +198,20 @@ export class ViewOnData {
       // 默认显示数据的长度和默认试图长度的比例
       defaultLengthRatio: 0.618,
     }
-    opts = mergeDeep(defOpts, opts)
-    this.opts = opts
+
+    this.setOptions(defaultOptions, options)
 
     // 初始化this.#totalDataLength
-    this.#totalDataLength = this.opts.totalDataLength
+    this.#totalDataLength = this.options.totalDataLength
 
 
     this.reset()
   }
 
+  setOptions(target: OptionType, source: OptionType) {
+    this.options = options.setOptions(target, source)
+    return this
+  }
   /*
   setProp(name, value) {
     // 简单设置
@@ -232,13 +233,13 @@ export class ViewOnData {
   // 重置
   reset() {
     // 计算默认显示数据的长度
-    const len = Math.ceil(this.opts.defaultViewLength * this.opts.defaultLengthRatio)
+    const len = Math.ceil(this.options.defaultViewLength * this.options.defaultLengthRatio)
 
     // 索引范围
     this.indexRange = [-len, undefined]
 
     // 总宽度
-    this.totalWidth = this.opts.defaultTotalLength
+    this.totalWidth = this.options.defaultTotalLength
     return this
   }
 

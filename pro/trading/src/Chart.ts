@@ -94,6 +94,7 @@ export default class Chart {
 
   setOptions(target: OptionType, source: OptionType) {
     this.options = options.setOptions(target, source)
+    return this
   }
 
   mouseMoveEvent(cb: Function) {

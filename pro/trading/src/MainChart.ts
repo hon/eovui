@@ -1,15 +1,10 @@
 import CandleStick from './CandleStick'
 import {Layer} from './Layers'
-import { mergeDeep } from './helpers'
 import Coordinate from './Coordinate'
 import { ViewOnData } from './DataSerise'
 import Chart from './Chart'
+import options, { OptionType } from './utils/options'
 
-const dpr = window.devicePixelRatio
-
-type OptionType = {
-  [key: string]: any
-}
 
 
 /**
@@ -24,28 +19,30 @@ type OptionType = {
  *
  */
 export default class MainChart extends Layer {
-  opts: OptionType
+  options: OptionType
   chart: Chart
-  ctx: any
+  ctx: CanvasRenderingContext2D
   dataSerise: any
-  coord: any
+  coord: Coordinate
   dataView: ViewOnData
 
-  constructor(opts: OptionType) {
+  constructor(options: OptionType) {
     super()
-    const defOpts = {
+
+    const defaultOptions = {
       mainChartType: 'candlestick',
       candleStick: {
         bodyWidth: 16,
         gap: 2,
       },
     }
-    opts = mergeDeep(defOpts, opts)
-    this.opts = opts
+    this.setOptions(defaultOptions, options)
 
-    this.chart = opts.chart
+
+    this.chart = this.options.chart
     this.ctx = this.chart.ctx
-    this.dataSerise = opts.dataSerise
+
+    this.dataSerise = this.options.dataSerise
 
     const mainChartTypes = ['candlestick', 'ohlc', 'line']
 
@@ -73,10 +70,10 @@ export default class MainChart extends Layer {
       // 水平偏移
       offset: {
         // 每项的宽度
-        width: this.opts.candleStick.bodyWidth,
+        width: this.options.candleStick.bodyWidth,
         
         // 每项的间隔
-        gap: this.opts.candleStick.gap,
+        gap: this.options.candleStick.gap,
       }
     })
     this.coord = coord
@@ -110,11 +107,16 @@ export default class MainChart extends Layer {
     this.dataSerise.setSegmentRange(this.dataView.indexRange)
   }
 
+  setOptions(target: OptionType, source: OptionType) {
+    this.options = options.setOptions(target, source)
+    return this
+  }
+
   /**
    * 图标视图中k线的数量
    */
   widthByKLine() {
-    return Math.floor(this.chart.width / (this.opts.candleStick.bodyWidth + this.opts.candleStick.gap))
+    return Math.floor(this.chart.width / (this.options.candleStick.bodyWidth + this.options.candleStick.gap))
   }
 
   move(step: number) {
@@ -136,6 +138,7 @@ export default class MainChart extends Layer {
    */
   draw() {
     const self = this
+    const dpr = window.devicePixelRatio
 
     // 重新设置可是区域的最高价和最低价
     const highestLowestPrice = this.dataSerise.highestLowestPrice()
@@ -144,9 +147,9 @@ export default class MainChart extends Layer {
       low: highestLowestPrice[1],
     })
 
-    let bodyWidth = this.opts.candleStick.bodyWidth 
+    let bodyWidth = this.options.candleStick.bodyWidth 
     // 每个蜡烛图之间的间距
-    let gap = this.opts.candleStick.gap
+    let gap = this.options.candleStick.gap
     const ctx = self.ctx
 
     this.dataSerise.segmentData.dataItems.forEach((dataItem: any, idx: number) => {
@@ -261,29 +264,33 @@ export default class MainChart extends Layer {
  * 移动平均线图表
  */
 export class MaChart extends Layer{
-  opts: OptionType
+  options: OptionType
   mainChart: MainChart
   chart: any
   ctx: any
   dataSerise: any
   period: number
   algoName: string
-  constructor(opts: OptionType) {
+  constructor(options: OptionType) {
     super()
-    const defOpts = {
+    const defaultOptions = {
       lineWidth: 1,
       lineColor: '#ffcc33',
       period: 5, 
     }
-    opts = mergeDeep(defOpts, opts)
-    this.opts = opts
-    this.mainChart = opts.mainChart
+    this.setOptions(defaultOptions, options)
+    this.mainChart = this.options.mainChart
     this.chart = this.mainChart.chart
     this.ctx = this.chart.ctx
     this.dataSerise = this.mainChart.dataSerise
 
-    this.period = opts.period
+    this.period = this.options.period
     this.algoName = `ma${this.period}`
+  }
+
+  setOptions(target: OptionType, source: OptionType) {
+    this.options = options.setOptions(target, source)
+    return this
   }
 
   // 移动平均线算法
@@ -319,10 +326,10 @@ export class MaChart extends Layer{
     const highestLowestPrice = this.dataSerise.highestLowestPrice()
 
     // body的顶部，距离表上方的距离
-    const bodyWidth = self.mainChart.opts.candleStick.bodyWidth
+    const bodyWidth = self.mainChart.options.candleStick.bodyWidth
 
     // 每个蜡烛图之间的间距
-    let gap = self.mainChart.opts.candleStick.gap
+    let gap = self.mainChart.options.candleStick.gap
     const ctx = self.ctx
     const dpr = window.devicePixelRatio
 
@@ -339,8 +346,8 @@ export class MaChart extends Layer{
           ctx.moveTo(x, y)
         } else {
           ctx.lineTo(x, y)
-          ctx.strokeStyle = self.opts.lineColor
-          ctx.lineWidth = self.opts.lineWidth / dpr
+          ctx.strokeStyle = self.options.lineColor
+          ctx.lineWidth = self.options.lineWidth / dpr
         }
       }
     })
@@ -353,19 +360,19 @@ export class MaChart extends Layer{
 
 // 游标
 export class Cursor extends Layer {
-  opts: OptionType
-  chart: any
-  constructor(opts: OptionType) {
+  options: OptionType
+  chart: Chart
+  constructor(options: OptionType) {
     super()
-    const defOpts = {
+    const defaultOptions = {
       cursor: 'crosshair'
       
     }
-    opts = mergeDeep(defOpts, opts)
-    this.opts = opts
-    this.chart = this.opts.chart
+    this.setOptions(defaultOptions, options)
 
-    this.chart.canvas.style.cursor = this.opts.cursor
+    this.chart = this.options.chart
+
+    this.chart.canvas.style.cursor = this.options.cursor
 
     const self = this
     this.chart.mouseMoveEvent((evt: any) => {
@@ -373,6 +380,11 @@ export class Cursor extends Layer {
       this.drawLines(evt.mouseX, evt.mouseY)
     })
 
+  }
+
+  setOptions(target: OptionType, source: OptionType) {
+    this.options = options.setOptions(target, source)
+    return this
   }
 
   drawLines(x: number, y: number) {

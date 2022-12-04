@@ -1,4 +1,4 @@
-import { mergeDeep } from './helpers'
+import options, { OptionType } from './utils/options'
 /**
  * 坐标系统
  * 主要功能是:
@@ -11,9 +11,9 @@ import { mergeDeep } from './helpers'
 
 const dpr = window.devicePixelRatio
 export default class Coordinate {
-  opts: any
-  constructor(opts: any) {
-    const defOpts = {
+  options: OptionType
+  constructor(options: OptionType) {
+    const defaultOptions = {
       // 视觉信息
       width: 0,
       height: 0,
@@ -42,17 +42,22 @@ export default class Coordinate {
       }
     }
 
-    opts = mergeDeep(defOpts, opts)
-    this.opts = opts
+    this.setOptions(defaultOptions, options)
 
+  }
+
+  setOptions(target: OptionType, source: OptionType) {
+    this.options = options.setOptions(target, source)
+    return this
   }
 
   /**
    * 像素和数据的比, 通过这种映射关系，能确保将价格转换成图表上的像素点。
    */
   heightAndDataRatio() {
-    const validateHeight = this.opts.height - (this.opts.padding.top + this.opts.padding.bottom)
-    const dataDistance = this.opts.data.high - this.opts.data.low
+    const options = this.options
+    const validateHeight = options.height - (options.padding.top + options.padding.bottom)
+    const dataDistance = options.data.high - options.data.low
     return validateHeight / dataDistance
   }
 
@@ -81,8 +86,8 @@ export default class Coordinate {
    * 根据某个（像素）点x的位置，计算数值的索引
    */
   calcDataIndex(x: number): number {
-    const width = x - this.opts.padding.left
-    return Math.floor(width / ((this.opts.offset.width + this.opts.offset.gap) / dpr))
+    const width = x - this.options.padding.left
+    return Math.floor(width / ((this.options.offset.width + this.options.offset.gap) / dpr))
   }
 
   /**
@@ -96,7 +101,7 @@ export default class Coordinate {
     ratio = 1 / ratio
 
     // 像素距离
-    const height = y - this.opts.padding.top / dpr
+    const height = y - this.options.padding.top / dpr
 
     // 计算价格距离
     const priceDistance = ratio * height
@@ -105,7 +110,7 @@ export default class Coordinate {
     // const highestLowestPrice = this.dataSerise.highestLowestPrice()
 
     // 求得价格距离和最高阶的距离
-    return this.opts.data.high - priceDistance
+    return this.options.data.high - priceDistance
   }
 
   /**
@@ -115,7 +120,7 @@ export default class Coordinate {
    * @param {object} data - 配置项里的动态数据
    */
   updateData(data: any): Coordinate {
-    this.opts.data = data
+    this.options.data = data
     return this
   }
 
