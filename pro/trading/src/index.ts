@@ -15,7 +15,7 @@ const zoomOut = $('zoomOut')
 const refresh = $('refresh')
 
 const symbol = '603327'
-const size = 80
+const size = 150
 const chart = new Chart({
   selector: '#canvas1'
 })
@@ -54,8 +54,11 @@ function run(symbol: string, size: number, period = 'day') {
       })
 
       prevEl.addEventListener('click', async evt => {
-        await dataSerise.prependData(40)
-        chart.update()
+        //await dataSerise.prependData(40)
+        kl.move(-1)
+      })
+      nextEl.addEventListener('click', async evt => {
+        kl.move(1)
       })
 
       const ma5 = new MaChart({

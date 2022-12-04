@@ -1,6 +1,7 @@
 import DataItem, { IDataItem } from "./DataItem"
 import options, { OptionType } from './utils/options'
 
+type IndexRange = [number, number]
 
 /**
  * 连续数据 
@@ -41,13 +42,12 @@ export default class DataSerise{
    * 修改segmentRange
    * @param {Array<any>} range - 数据段的范围
    */
-  setSegmentRange(range: any[]) {
+  setSegmentRange(range: IndexRange) {
     const itemLength = this.data.dataItems.length
     // 去除不合理的range
     if (Math.abs(range[0]) > itemLength) {
       range[0] = - itemLength
     }
-    console.log(range)
     this.segmentRange = range
     this.segment()
   }
@@ -178,13 +178,12 @@ export default class DataSerise{
  */
 export class ViewOnData {
   // 数据总长度
-  #totalDataLength
+  totalDataLength: number
   options: OptionType
   totalWidth: number
-  indexRange: any
-  zoomNum: number
-  zoomPoint: any
-  zoomDirection: any
+  indexRange: IndexRange
+  zoomPoint: string
+  zoomDirection: string
 
 
   constructor(options: OptionType) {
@@ -193,7 +192,7 @@ export class ViewOnData {
       totalDataLength: 0,
 
       // 默认视图长度
-      defaultViewLength: 100,
+      defaultViewLength: 0,
 
       // 默认显示数据的长度和默认试图长度的比例
       defaultLengthRatio: 0.618,
@@ -202,8 +201,7 @@ export class ViewOnData {
     this.setOptions(defaultOptions, options)
 
     // 初始化this.#totalDataLength
-    this.#totalDataLength = this.options.totalDataLength
-
+    this.totalDataLength = this.options.totalDataLength
 
     this.reset()
   }
@@ -233,7 +231,9 @@ export class ViewOnData {
   // 重置
   reset() {
     // 计算默认显示数据的长度
-    const len = Math.ceil(this.options.defaultViewLength * this.options.defaultLengthRatio)
+    let len = Math.floor(this.options.defaultViewLength * this.options.defaultLengthRatio)
+
+    len = len > this.totalDataLength ? this.totalDataLength : len 
 
     // 索引范围
     this.indexRange = [-len, undefined]
@@ -245,46 +245,20 @@ export class ViewOnData {
 
   /**
    * 移动, 视图是固定的，移动的是数据。
-   * @param {number} step - 移动步幅。为正数，往左，为负数，往右
+   * @param {number} step - 移动步幅。往左移动为负数，往右移动为正数
    */
   move(step: number) {
-    const range = this.indexRange
-    this.indexRange = [range[0] + step, range[1] + step]
-    // 这一步要在外部调用的时候做。
-    // 因为涉及到另外两个变量：总数据的长度和每次新新增数据的长度。
-    this.fixRange()
-    return this
-  }
-
-  // 往后
-  /*
-  next(num) {
-    const range = this.indexRange
-    this.indexRange = [range[0] + num, range[1] + num]
-    this.fixRange()
-    return this
-  }
-  */
-
-  setZoomNum(value: number) {
-    this.zoomNum = value
-    return this
+    return this.setRange(step, step)
   }
 
   // 放大
-  zoomIn() {
-    const range = this.indexRange
-    this.indexRange = [range[0] - this.zoomNum, range[1] + this.zoomNum]
-    this.fixRange()
-    return this
+  zoomIn(step: number) {
+    return this.setRange(-step, +step)
   }
 
   // 缩小
-  zoomOut() {
-    const range = this.indexRange
-    this.indexRange = [range[0] + this.zoomNum, range[1] - this.zoomNum]
-    this.fixRange()
-    return this
+  zoomOut(step: number) {
+    return this.setRange(+step, -step)
   }
 
   /**
@@ -292,7 +266,7 @@ export class ViewOnData {
    *    1. cursor, 鼠标的位置
    *    2. center, 图表中心点的位置
    */
-  setZoomPoint(point: any) {
+  setZoomPoint(point: string = 'cursor') {
     this.zoomPoint = point
     return this
   }
@@ -303,7 +277,7 @@ export class ViewOnData {
    *    2. left, 往左缩放
    *    3. right, 往右缩放
    */
-  setZoomDirection(direction: any) {
+  setZoomDirection(direction: string = 'expand') {
     const directions = ['expand', 'left', 'right']
     if (directions.indexOf(direction) > -1) {
       this.zoomDirection = direction
@@ -313,23 +287,38 @@ export class ViewOnData {
     return this
   }
 
-
-  //setZoomPoint(midPoint, style) {}
   
   // 操作后，index range会超出范围，统一在此修复
-  fixRange(){
-    // 当所有的数据都加载完成，此时再继续往右移动的时候，要处理第一个元素的边界问题
-    if (this.indexRange[0] < - this.#totalDataLength) {
-      this.indexRange[0] = - this.#totalDataLength
+  setRange(startStep: number, endStep: number){
+    if (startStep != 0 && endStep != 0) {
+      const range = this.indexRange
+      let first = range[0]
+      let last = range[1]
+
+      // 当所有的数据都加载完成，此时再继续往右移动的时候，要处理第一个元素的边界问题
+      if (first < - this.totalDataLength) {
+        first = - this.totalDataLength
+      } else {
+        first += startStep
+      }
+
+      // 当数据往左移动，数据段里的数据个数，小于数据段的宽度时，处理最后一个元素
+      // 数据已经在倒数第一个了
+      if (typeof last === 'undefined') {
+        // 还在往右移动
+        if (endStep > 0) {
+          last = undefined
+        } else {
+          // 往左移动（没有0的情况）
+          last = endStep
+        }
+      } else {
+        last += endStep
+      }
+
+      this.indexRange = [first, last]
     }
-
-    // 当数据往左移动，数据段里的数据个数，小于数据段的宽度时，处理最后一个元素
-    if(this.indexRange[1] < -1) {
-      // 取到数据的最后
-      this.indexRange = undefined
-    }
-
-
+    return this
   }
 
 }

@@ -96,13 +96,12 @@ export default class MainChart extends Layer {
     })
 
     const totalWidth = this.widthByKLine()
+
     this.dataView = new ViewOnData({
-
-      defaultTotalWidth: totalWidth,
-
-      defaultIndexRange: [- Math.floor(totalWidth * 0.618), 79]
-      
+      totalDataLength: self.dataSerise.data.dataItems.length,
+      defaultViewLength: totalWidth,
     })
+
 
     this.dataSerise.setSegmentRange(this.dataView.indexRange)
   }
@@ -116,17 +115,21 @@ export default class MainChart extends Layer {
    * 图标视图中k线的数量
    */
   widthByKLine() {
-    return Math.floor(this.chart.width / (this.options.candleStick.bodyWidth + this.options.candleStick.gap))
+    return Math.floor(
+      this.chart.width / (this.options.candleStick.bodyWidth + this.options.candleStick.gap)
+    )
   }
 
   move(step: number) {
     // 修改数据视图的range
-    const range = this.dataView.move(step)
+    const range = this.dataView.move(step).indexRange
 
     // 将range应用到数据
     this.dataSerise.setSegmentRange(range)
 
     // 更新数据
+    // 更新画面
+    this.chart.update()
   }
   
   zoom() {

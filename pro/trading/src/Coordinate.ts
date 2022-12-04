@@ -9,7 +9,6 @@ import options, { OptionType } from './utils/options'
  * 分离出来。
  */
 
-const dpr = window.devicePixelRatio
 export default class Coordinate {
   options: OptionType
   constructor(options: OptionType) {
@@ -86,6 +85,7 @@ export default class Coordinate {
    * 根据某个（像素）点x的位置，计算数值的索引
    */
   calcDataIndex(x: number): number {
+    const dpr = window.devicePixelRatio
     const width = x - this.options.padding.left
     return Math.floor(width / ((this.options.offset.width + this.options.offset.gap) / dpr))
   }
@@ -94,6 +94,7 @@ export default class Coordinate {
    * 根据某个（像素）点y的值，计算对应的数值
    */
   calcDataValue(y: number): number {
+    const dpr = window.devicePixelRatio
     // 现在要计算的是逻辑像素距离和价格距离的比值，因此要除以pdr
     let ratio = this.heightAndDataRatio() / dpr
 
