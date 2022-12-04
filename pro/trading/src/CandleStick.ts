@@ -35,6 +35,7 @@ export default class CandleStick {
         gap: {},
       },
     }
+
     opts = mergeDeep(defOpts, opts)
     this.opts = opts
     this.ctx = opts.ctx
@@ -57,7 +58,7 @@ export default class CandleStick {
 
   // 绘制蜡烛图实体
   drawBody() {
-    const dpr = this.ctx.dpr
+    const dpr = window.devicePixelRatio 
     const bodyHeight = this.body.height / dpr
     this.ctx.fillRect(this.body.x / dpr, this.body.y / dpr, this.body.width / dpr, 
       bodyHeight == 0 ? 1 : bodyHeight)
@@ -67,7 +68,7 @@ export default class CandleStick {
 
   // 绘制蜡烛图上影线
   drawHead() {
-    const dpr = this.ctx.dpr
+    const dpr = window.devicePixelRatio
     const x = this.body.x + (this.body.width / dpr - 1)
     this.ctx.fillRect(x / dpr, this.head.y / dpr, 1, this.head.height / dpr)
     return this
@@ -75,7 +76,7 @@ export default class CandleStick {
 
   // 绘制蜡烛图下影线
   drawTail() {
-    const dpr = this.ctx.dpr
+    const dpr = window.devicePixelRatio
     const x = this.body.x + (this.body.width / dpr - 1)
     this.ctx.fillRect(x / dpr, this.tail.y / dpr, 1, this.tail.height / dpr)
     return this

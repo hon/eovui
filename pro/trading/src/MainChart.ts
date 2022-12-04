@@ -3,6 +3,7 @@ import {Layer} from './Layers'
 import { mergeDeep } from './helpers'
 import Coordinate from './Coordinate'
 import { ViewOnData } from './DataSerise'
+import Chart from './Chart'
 
 const dpr = window.devicePixelRatio
 
@@ -24,7 +25,7 @@ type OptionType = {
  */
 export default class MainChart extends Layer {
   opts: OptionType
-  chart: any
+  chart: Chart
   ctx: any
   dataSerise: any
   coord: any
@@ -58,9 +59,9 @@ export default class MainChart extends Layer {
       width: this.chart.width,
       height: this.chart.height,
       padding: {
-        top: this.chart.opts.paddingTop,
+        top: this.chart.options.paddingTop,
         right: 0,
-        bottom: this.chart.opts.paddingBottom,
+        bottom: this.chart.options.paddingBottom,
         left: 0,
       },
       // 数据信息
@@ -154,7 +155,7 @@ export default class MainChart extends Layer {
       const drawKline = () => {
         const bodyOffset = idx * (bodyWidth + gap)
         // body的顶部，距离表上方的距离
-        let bodyTopHeight = self.chart.opts.paddingTop
+        let bodyTopHeight = self.chart.options.paddingTop
 
         // 头部的高度
         let headHeight = 0
@@ -213,7 +214,7 @@ export default class MainChart extends Layer {
         // 显示最高价和最低价
         // todo 如果有多个最高价或多个最低价，现实会重叠
         if (dataItem.high == highestLowestPrice[0]) {
-          self.text(dataItem.high, bodyOffset / dpr, self.chart.opts.paddingTop / dpr)
+          self.text(dataItem.high, bodyOffset / dpr, self.chart.options.paddingTop / dpr)
         }
         if (dataItem.low == highestLowestPrice[1]) {
           self.text(dataItem.low, bodyOffset / dpr, (bodyTopHeight + bodyHeight + tailHeight) / dpr + 4, 'top')
@@ -246,7 +247,7 @@ export default class MainChart extends Layer {
 
   }
 
-  text(content: any, x: number, y: number, baseLine: string = 'bottom') {
+  text(content: any, x: number, y: number, baseLine: CanvasTextBaseline = 'bottom') {
     const ctx = this.chart.ctx
     ctx.font = "normal normal 12px Verdana"
     ctx.fillStyle = "#ffffff"
@@ -323,7 +324,7 @@ export class MaChart extends Layer{
     // 每个蜡烛图之间的间距
     let gap = self.mainChart.opts.candleStick.gap
     const ctx = self.ctx
-    const dpr = self.ctx.dpr
+    const dpr = window.devicePixelRatio
 
     const maData = self.dataSerise.segmentData[`ma${self.period}`]
 
@@ -332,7 +333,7 @@ export class MaChart extends Layer{
     maData.forEach((item: any, idx: any) => {
       if (idx >= self.period - 1) {
         const x = idx * (bodyWidth + gap) / dpr + bodyWidth / 4
-        let y = self.chart.opts.paddingTop / dpr
+        let y = self.chart.options.paddingTop / dpr
         y += self.mainChart.coord.calcHeight((highestLowestPrice[0] - item)) / dpr
         if (idx == self.period -1) {
           ctx.moveTo(x, y)

@@ -1,8 +1,6 @@
 import Layers, {Layer} from './Layers'
-import { mergeDeep } from './helpers'
-type OptionType = {
-  [key: string]: any
-}
+import options, { OptionType } from './utils/options'
+
 /**
  * 主图,
  * 主要功能
@@ -14,27 +12,35 @@ type OptionType = {
  * 因为数据是由具体的图层决定的
  */
 export default class Chart {
-  opts: any
-  canvas: any
-  ctx: any
+  options: OptionType
+  canvas: HTMLCanvasElement
+  ctx: CanvasRenderingContext2D
+
+  // Width of canvas draw enviroment
   width: number
+
+  // Height of canvas draw enviroment
   height: number
+
+  // Width of canvas on screen
   styleWidth: number
+
+  // Height of canvas on screen
   styleHeight: number
-  dpr: number
   layers: Layers
   canvasPosition: any
   mouseDown: boolean
+
   /**
-   * @param {Object} opts - 配置选项 
+   * @param {OptionType} options - 配置选项 
    * ## 配置选项和对象属性
    * 配置项是对象初始化的时候用来配置的，如果用参数分别来传入，会使参数个数变多，可读性和可
    * 操作性差。配置项在传入的时候就不在改变了，如果需要改变，应该将该配置项复制到对象属性上。
    * 因此他们主要的区别是看要不要改变。
    */
-  constructor(opts: OptionType) {
+  constructor(options: OptionType) {
     // 默认数据项，当对象初始化时，传入的数据项如果没有设置相关的项，会使用默认配置项。
-    const defOpts = {
+    const defaultOptions = {
      // canvas元素选择器
       selector: '',
 
@@ -50,22 +56,21 @@ export default class Chart {
       zoomPoint: 'cursor',
     }
 
-    // 覆盖默认配置
-    opts = mergeDeep(defOpts, opts)
+    this.setOptions(defaultOptions, options)
 
     
-    const {canvas, ctx, width, height, styleWidth, styleHeight} = this.initCanvas(document.querySelector(opts.selector))
+    const {
+      canvas, ctx, width, height, styleWidth,
+      styleHeight
+    } = this.initCanvas(document.querySelector(this.options.selector))
 
 
-    this.opts = opts
     this.canvas = canvas
     this.ctx = ctx
     this.width = width 
     this.height = height
     this.styleWidth = styleWidth
     this.styleHeight = styleHeight
-    this.dpr = ctx.dpr
-
     this.layers = new Layers()
 
     //this.mouseMoveEvent()
@@ -85,6 +90,10 @@ export default class Chart {
       self.mouseDown = false
     })
 
+  }
+
+  setOptions(target: OptionType, source: OptionType) {
+    this.options = options.setOptions(target, source)
   }
 
   mouseMoveEvent(cb: Function) {
@@ -107,7 +116,7 @@ export default class Chart {
    * @param {HTMLCanvasElement} canvas - canvas 元素
    * @return {Object}
    */
-  initCanvas(canvas: any): any {
+  initCanvas(canvas: HTMLCanvasElement): any {
     const ctx = canvas.getContext('2d')
     let width = canvas.width
     let height = canvas.height
@@ -124,22 +133,20 @@ export default class Chart {
     canvas.style.width = styleWidth + 'px';
     canvas.style.height = styleHeight + 'px';
     ctx.scale(dpr, dpr);
-    ctx.dpr = dpr
     return {canvas, ctx, width, height, styleWidth, styleHeight}
   }
 
   /**
-   * 往主图上添加单个图层
+   * Add single layer
    * @param {Layer} layer - 图层实例
    */
   addLayer(layer: Layer) {
     this.layers.addLayer(layer)
     return this
-
   }
 
   /**
-   * 往主图上添加单个图层
+   * Add one or more layers 
    */
   addLayers(...args: Layer[]) {
     [...arguments].forEach(layer => {
@@ -154,7 +161,7 @@ export default class Chart {
   }
   
   /**
-   * 刷新
+   * Update the canvas
    */
   update() {
     //this.ctx.save()
@@ -165,4 +172,3 @@ export default class Chart {
   }
   
 }
- 

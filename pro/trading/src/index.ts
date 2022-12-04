@@ -1,11 +1,10 @@
 import "./assets/style/index.scss"
-console.log('@eovui-trading chart!')
 import DataItem from './DataItem'
 import Chart from './Chart'
 import MainChart, { MaChart, Cursor } from './MainChart'
 import DataSerise from './DataSerise'
 
-function $(id: any) {
+function $(id: string) {
   return document.getElementById(id)
 }
 
