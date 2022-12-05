@@ -1,5 +1,5 @@
 # Eovui
-"Eov" is short of "element of visual". The is a web ui library written with Rust.
+"Eov" is short of "element of visual". Eovui is a ui library made with follow philosophies and heart.
 
 # Philosophy
 - Usable, well tested.
