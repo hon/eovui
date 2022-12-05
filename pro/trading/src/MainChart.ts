@@ -3,7 +3,7 @@ import {Layer} from './Layers'
 import Coordinate from './Coordinate'
 import { ViewOnData } from './DataSerise'
 import Chart from './Chart'
-import options, { OptionType } from './utils/options'
+import {default as optionsUtil, OptionType } from './utils/options'
 
 
 
@@ -25,6 +25,10 @@ export default class MainChart extends Layer {
   dataSerise: any
   coord: Coordinate
   dataView: ViewOnData
+  // 鼠标的位置
+  mousePosition: {x: number, y: number}
+  // 响应式的时候需要重新设置
+  centerPoint: {x: number, y: number}
 
   constructor(options: OptionType) {
     super()
@@ -36,7 +40,8 @@ export default class MainChart extends Layer {
         gap: 2,
       },
     }
-    this.setOptions(defaultOptions, options)
+    this.options = optionsUtil.setOptions(defaultOptions, options)
+    this.mousePosition = {x: 0, y: 0}
 
 
     this.chart = this.options.chart
@@ -76,10 +81,13 @@ export default class MainChart extends Layer {
         gap: this.options.candleStick.gap,
       }
     })
+
+
     this.coord = coord
 
     // 鼠标移动事件
     this.chart.mouseMoveEvent(async (evt: any) => {
+      self.mousePosition = {x: evt.mouseX, y: evt.mouseY}
       const priceRange = self.dataSerise.highestLowestPrice()
       self.coord.updateData({
         high: priceRange[0],
@@ -95,19 +103,19 @@ export default class MainChart extends Layer {
 
     })
 
-    const totalWidth = this.widthByKLine()
+    const viewWidth = this.widthByKLine()
 
     this.dataView = new ViewOnData({
       totalDataLength: self.dataSerise.data.dataItems.length,
-      defaultViewLength: totalWidth,
+      defaultViewWidth: viewWidth,
     })
 
 
     this.dataSerise.setSegmentRange(this.dataView.indexRange)
   }
 
-  setOptions(target: OptionType, source: OptionType) {
-    this.options = options.setOptions(target, source)
+  setOptions(newOptions: OptionType) {
+    this.options = optionsUtil.setOptions(this.options, newOptions)
     return this
   }
 
@@ -124,6 +132,7 @@ export default class MainChart extends Layer {
     // 修改数据视图的range
     const range = this.dataView.move(step).indexRange
 
+
     // 将range应用到数据
     this.dataSerise.setSegmentRange(range)
 
@@ -132,8 +141,66 @@ export default class MainChart extends Layer {
     this.chart.update()
   }
   
-  zoom() {
+  // 放大
+  zoomIn() {
+    const step = 5
+    this.dataView.zoomIn(step)
+    const viewWidth = this.dataView.viewWidth
+    let klineWidth = (this.chart.width) / viewWidth
+    const bodyWidth = Math.floor(klineWidth) - 2
+    const gap = klineWidth - bodyWidth
+    this.options.candleStick.bodyWidth = bodyWidth
+    this.options.candleStick.gap = gap
 
+    // 修改数据视图的range
+    const range = this.dataView.indexRange
+
+
+    // 将range应用到数据
+    this.dataSerise.setSegmentRange(range)
+    /*
+    this.options.candleStick.bodyWidth += 2
+    this.options.candleStick.gap += 1
+    const viewWidth = this.widthByKLine()
+    this.dataView.setViewWidth(viewWidth)
+    this.dataSerise.setSegmentRange(this.dataView.indexRange)
+
+    // 更新画面
+    this.chart.update()
+    */
+    // 更新画面
+    this.chart.update()
+  }
+
+  // 缩小
+  zoomOut() {
+    const step = 5
+    this.dataView.zoomOut(step)
+    const viewWidth = this.dataView.viewWidth
+    const klineWidth = this.chart.width / viewWidth
+    const bodyWidth = Math.floor(klineWidth) - 2
+    const gap = klineWidth - bodyWidth
+    this.options.candleStick.bodyWidth = bodyWidth
+    this.options.candleStick.gap = gap
+    // 修改数据视图的range
+    const range = this.dataView.indexRange
+
+
+    // 将range应用到数据
+    this.dataSerise.setSegmentRange(range)
+    /*
+    this.options.candleStick.bodyWidth -= 2
+    this.options.candleStick.gap -= 1
+    const viewWidth = this.widthByKLine()
+    console.log(viewWidth)
+    this.dataView.setViewWidth(viewWidth)
+    this.dataSerise.setSegmentRange(this.dataView.indexRange)
+
+    // 更新画面
+    this.chart.update()
+    */
+    // 更新画面
+    this.chart.update()
   }
 
   /**
@@ -281,7 +348,7 @@ export class MaChart extends Layer{
       lineColor: '#ffcc33',
       period: 5, 
     }
-    this.setOptions(defaultOptions, options)
+    this.options = optionsUtil.setOptions(defaultOptions, options)
     this.mainChart = this.options.mainChart
     this.chart = this.mainChart.chart
     this.ctx = this.chart.ctx
@@ -291,8 +358,8 @@ export class MaChart extends Layer{
     this.algoName = `ma${this.period}`
   }
 
-  setOptions(target: OptionType, source: OptionType) {
-    this.options = options.setOptions(target, source)
+  setOptions(newOptions: OptionType) {
+    this.options = optionsUtil.setOptions(this.options, newOptions)
     return this
   }
 
@@ -371,7 +438,7 @@ export class Cursor extends Layer {
       cursor: 'crosshair'
       
     }
-    this.setOptions(defaultOptions, options)
+    this.options = optionsUtil.setOptions(defaultOptions, options)
 
     this.chart = this.options.chart
 
@@ -385,8 +452,8 @@ export class Cursor extends Layer {
 
   }
 
-  setOptions(target: OptionType, source: OptionType) {
-    this.options = options.setOptions(target, source)
+  setOptions(newOptions: OptionType) {
+    this.options = optionsUtil.setOptions(this.options, newOptions)
     return this
   }
 

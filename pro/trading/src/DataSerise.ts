@@ -1,7 +1,7 @@
 import DataItem, { IDataItem } from "./DataItem"
 import options, { OptionType } from './utils/options'
 
-type IndexRange = [number, number]
+type IndexRange = [number, number | undefined]
 
 /**
  * 连续数据 
@@ -180,7 +180,7 @@ export class ViewOnData {
   // 数据总长度
   totalDataLength: number
   options: OptionType
-  totalWidth: number
+  viewWidth: number
   indexRange: IndexRange
   zoomPoint: string
   zoomDirection: string
@@ -192,7 +192,7 @@ export class ViewOnData {
       totalDataLength: 0,
 
       // 默认视图长度
-      defaultViewLength: 0,
+      defaultViewWidth: 0,
 
       // 默认显示数据的长度和默认试图长度的比例
       defaultLengthRatio: 0.618,
@@ -223,15 +223,17 @@ export class ViewOnData {
   /**
    * 可视区域的总长度, 该值会随着放大缩小一直改变
    */
-  setTotalWidth(width: number) {
-    this.totalWidth = width 
+  setViewWidth(width: number) {
+    width = width >= 8 ? width : 8
+    this.viewWidth = width 
     return this
   }
+
 
   // 重置
   reset() {
     // 计算默认显示数据的长度
-    let len = Math.floor(this.options.defaultViewLength * this.options.defaultLengthRatio)
+    let len = Math.floor(this.options.defaultViewWidth * this.options.defaultLengthRatio)
 
     len = len > this.totalDataLength ? this.totalDataLength : len 
 
@@ -239,13 +241,13 @@ export class ViewOnData {
     this.indexRange = [-len, undefined]
 
     // 总宽度
-    this.totalWidth = this.options.defaultTotalLength
+    this.setViewWidth(this.options.defaultViewWidth)
     return this
   }
 
   /**
    * 移动, 视图是固定的，移动的是数据。
-   * @param {number} step - 移动步幅。往左移动为负数，往右移动为正数
+   * @param {number} step - 移动步幅。往左移动为正数，往右移动为负数
    */
   move(step: number) {
     return this.setRange(step, step)
@@ -253,12 +255,19 @@ export class ViewOnData {
 
   // 放大
   zoomIn(step: number) {
-    return this.setRange(-step, +step)
+    if(this.viewWidth > 8) {
+      // 左右各变化一个step
+      this.setViewWidth(this.viewWidth - step * 2)
+      this.setRange(+step, -step)
+    }
+    return this
   }
 
   // 缩小
   zoomOut(step: number) {
-    return this.setRange(+step, -step)
+    // 左右各变化一个step
+    this.setViewWidth(this.viewWidth + step * 2)
+    return this.setRange(-step, +step)
   }
 
   /**
@@ -287,14 +296,35 @@ export class ViewOnData {
     return this
   }
 
+  rangeDistance() {
+    const range = this.indexRange
+    if (typeof range[1] == "undefined") {
+      return Math.abs(range[0])
+    } else {
+      return Math.abs(range[0] - range[1])
+    }
+  }
+
   
-  // 操作后，index range会超出范围，统一在此修复
+  /**
+   * 进行移动和缩放操作后，index range会超出范围，统一在此修复
+   * 这里的逻辑比较繁琐，因此需要耐心理解和调试
+   * 这里面的移动操作都使用加法运算，在调用setRange方法时，会根据移动的方向传入正负值
+   *
+   * @param {number} startStep - 开始的步幅, indexRange第一个值的变化值
+   * @param {number} endStep   - 结束的步幅, indexRange第二个值的变化值
+   */
   setRange(startStep: number, endStep: number){
     if (startStep != 0 && endStep != 0) {
       const range = this.indexRange
+      const distance = this.rangeDistance()
+
+      // 往做成移动时，保证至少有多少数据在视图内
+      const remainLength = 5
       let first = range[0]
       let last = range[1]
 
+      /** 计算indexRange的第一个值 **/
       // 当所有的数据都加载完成，此时再继续往右移动的时候，要处理第一个元素的边界问题
       if (first < - this.totalDataLength) {
         first = - this.totalDataLength
@@ -302,20 +332,43 @@ export class ViewOnData {
         first += startStep
       }
 
+      /** 计算indexRange的第二个值 **/
       // 当数据往左移动，数据段里的数据个数，小于数据段的宽度时，处理最后一个元素
       // 数据已经在倒数第一个了
       if (typeof last === 'undefined') {
-        // 还在往右移动
+        // 还在往左移动
         if (endStep > 0) {
           last = undefined
-        } else {
-          // 往左移动（没有0的情况）
-          last = endStep
+
+          // 当数据往左移动时，要保留一定的数据，超出这个保留的数量就什么都不做
+          // 否则视图里就没有数据了
+          if (first > -remainLength) {
+            return this
+          }
+        } else { // 往右移动（没有0的情况）
+          // 当超出视图范围才开始设置末尾的取值
+          if (this.rangeDistance() > this.viewWidth) {
+            last = endStep
+          }
         }
       } else {
-        last += endStep
+        // 当往右移动的时候，只要左侧没有到头就修改indexRagne的最后一个值
+        // 换句话说，当往右移动数据到头了，就什么都不做
+        if (first > - this.totalDataLength) {
+          last += endStep
+          /**
+           * 以下两种情况last需要设为undefined
+           * 1. 计算的时候，last大于或等于0
+           * 2. 索引之间的距离，小于视图的宽度
+           */
+          if (last >= 0) {
+            last = undefined
+          }
+        }
       }
 
+      console.log(this.indexRange)
+      console.log(this.rangeDistance(), this.viewWidth)
       this.indexRange = [first, last]
     }
     return this

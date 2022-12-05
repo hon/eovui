@@ -10,8 +10,8 @@ function $(id: string) {
 
 const prevEl = $('prev')
 const nextEl = $('next')
-const zoomIn = $('zoomIn')
-const zoomOut = $('zoomOut')
+const zoomInEl = $('zoom-in')
+const zoomOutEl = $('zoom-out')
 const refresh = $('refresh')
 
 const symbol = '603327'
@@ -55,10 +55,16 @@ function run(symbol: string, size: number, period = 'day') {
 
       prevEl.addEventListener('click', async evt => {
         //await dataSerise.prependData(40)
-        kl.move(-1)
+        kl.move(1)
       })
       nextEl.addEventListener('click', async evt => {
-        kl.move(1)
+        kl.move(-1)
+      })
+      zoomInEl.addEventListener('click', async evt => {
+        kl.zoomIn()
+      })
+      zoomOutEl.addEventListener('click', async evt => {
+        kl.zoomOut()
       })
 
       const ma5 = new MaChart({

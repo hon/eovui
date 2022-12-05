@@ -1,4 +1,4 @@
-import options, { OptionType } from './utils/options'
+import { default as optionsUtil, OptionType } from './utils/options'
 /**
  * 坐标系统
  * 主要功能是:
@@ -41,12 +41,12 @@ export default class Coordinate {
       }
     }
 
-    this.setOptions(defaultOptions, options)
+    this.options = optionsUtil.setOptions(defaultOptions, options)
 
   }
 
-  setOptions(target: OptionType, source: OptionType) {
-    this.options = options.setOptions(target, source)
+  setOptions(newOptions: OptionType) {
+    this.options = optionsUtil.setOptions(this.options, newOptions)
     return this
   }
 
