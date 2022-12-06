@@ -155,6 +155,8 @@ export default class MainChart extends Layer {
     // 修改数据视图的range
     const range = this.dataView.indexRange
 
+    console.log('zoomIn', viewWidth)
+    console.log('-------------------------')
 
     // 将range应用到数据
     this.dataSerise.setSegmentRange(range)
@@ -185,6 +187,9 @@ export default class MainChart extends Layer {
     // 修改数据视图的range
     const range = this.dataView.indexRange
 
+    console.log('zoomOut', viewWidth)
+    console.log('-------------------------')
+    
 
     // 将range应用到数据
     this.dataSerise.setSegmentRange(range)
@@ -221,6 +226,8 @@ export default class MainChart extends Layer {
     // 每个蜡烛图之间的间距
     let gap = this.options.candleStick.gap
     const ctx = self.ctx
+
+    //console.log(this.dataSerise.segmentData.dataItems.length)
 
     this.dataSerise.segmentData.dataItems.forEach((dataItem: any, idx: number) => {
 

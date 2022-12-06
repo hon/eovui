@@ -184,6 +184,7 @@ export class ViewOnData {
   indexRange: IndexRange
   zoomPoint: string
   zoomDirection: string
+  isOutOfView: boolean
 
 
   constructor(options: OptionType) {
@@ -193,6 +194,9 @@ export class ViewOnData {
 
       // 默认视图长度
       defaultViewWidth: 0,
+
+      // least data size remain in the view
+      minimalDataLength: 5,
 
       // 默认显示数据的长度和默认试图长度的比例
       defaultLengthRatio: 0.618,
@@ -240,6 +244,8 @@ export class ViewOnData {
     // 索引范围
     this.indexRange = [-len, undefined]
 
+    this.isOutOfView = false
+
     // 总宽度
     this.setViewWidth(this.options.defaultViewWidth)
     return this
@@ -267,7 +273,9 @@ export class ViewOnData {
   zoomOut(step: number) {
     // 左右各变化一个step
     this.setViewWidth(this.viewWidth + step * 2)
-    return this.setRange(-step, +step)
+    console.log(`view width out zoomin: ${this.viewWidth}`)
+    this.setRange(-step, +step)
+    return this
   }
 
   /**
@@ -317,59 +325,60 @@ export class ViewOnData {
   setRange(startStep: number, endStep: number){
     if (startStep != 0 && endStep != 0) {
       const range = this.indexRange
-      const distance = this.rangeDistance()
 
       // 往做成移动时，保证至少有多少数据在视图内
-      const remainLength = 5
+      const remainLength = this.options.minimalDataLength
       let first = range[0]
       let last = range[1]
 
-      /** 计算indexRange的第一个值 **/
+      /** Step 1. 计算indexRange的第一个值 **/
       // 当所有的数据都加载完成，此时再继续往右移动的时候，要处理第一个元素的边界问题
+      first += startStep
       if (first < - this.totalDataLength) {
         first = - this.totalDataLength
-      } else {
-        first += startStep
       }
 
-      /** 计算indexRange的第二个值 **/
+      /** Step 2. 计算indexRange的第二个值 **/
       // 当数据往左移动，数据段里的数据个数，小于数据段的宽度时，处理最后一个元素
       // 数据已经在倒数第一个了
-      if (typeof last === 'undefined') {
-        // 还在往左移动
-        if (endStep > 0) {
-          last = undefined
-
+      /** Step 2.1 第二项数据为undefined的情况 **/
+      if (typeof last === 'undefined' && !this.isOutOfView) {
+        if (
           // 当数据往左移动时，要保留一定的数据，超出这个保留的数量就什么都不做
           // 否则视图里就没有数据了
-          if (first > -remainLength) {
+          first > -remainLength) {
             return this
-          }
-        } else { // 往右移动（没有0的情况）
-          // 当超出视图范围才开始设置末尾的取值
-          if (this.rangeDistance() > this.viewWidth) {
-            last = endStep
-          }
         }
+
+        last = undefined
+
       } else {
+        /** Step 2.2 第二项数据为number的情况 **/
         // 当往右移动的时候，只要左侧没有到头就修改indexRagne的最后一个值
         // 换句话说，当往右移动数据到头了，就什么都不做
-        if (first > - this.totalDataLength) {
-          last += endStep
-          /**
-           * 以下两种情况last需要设为undefined
-           * 1. 计算的时候，last大于或等于0
-           * 2. 索引之间的距离，小于视图的宽度
-           */
+        if (first >= - this.totalDataLength) {
+          // 多显示一条数据，表示此时尾部的数据是超出视图的。
+          last = first + this.viewWidth + 1
+        
+          // last 如果大于0表示从头开始取，出现大于0的原因是，往右移动时超出了右边的极限
           if (last >= 0) {
             last = undefined
           }
         }
       }
 
+      /** Step 3. 修改indexRange **/
+      this.indexRange = [first, last]
+      
+      // 计算是否超出视图
+      if (this.rangeDistance() > this.viewWidth) {
+        this.isOutOfView = true
+      } else {
+        this.isOutOfView = false
+      }
       console.log(this.indexRange)
       console.log(this.rangeDistance(), this.viewWidth)
-      this.indexRange = [first, last]
+      console.log(this.isOutOfView)
     }
     return this
   }
