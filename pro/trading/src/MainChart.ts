@@ -128,10 +128,10 @@ export default class MainChart extends Layer {
     )
   }
 
-  move(step: number) {
-    // 修改数据视图的range
-    const range = this.dataView.move(step).indexRange
 
+  moveLeft() {
+    // 修改数据视图的range
+    const range = this.dataView.moveLeft().indexRange
 
     // 将range应用到数据
     this.dataSerise.setSegmentRange(range)
@@ -140,72 +140,65 @@ export default class MainChart extends Layer {
     // 更新画面
     this.chart.update()
   }
-  
-  // 放大
-  zoomIn() {
-    const step = 5
-    this.dataView.zoomIn(step)
-    const viewWidth = this.dataView.viewWidth
-    let klineWidth = (this.chart.width) / viewWidth
-    const bodyWidth = Math.floor(klineWidth) - 2
-    const gap = klineWidth - bodyWidth
-    this.options.candleStick.bodyWidth = bodyWidth
-    this.options.candleStick.gap = gap
 
+  moveRight() {
     // 修改数据视图的range
-    const range = this.dataView.indexRange
-
-    console.log('zoomIn', viewWidth)
-    console.log('-------------------------')
+    const range = this.dataView.moveRight().indexRange
 
     // 将range应用到数据
     this.dataSerise.setSegmentRange(range)
-    /*
-    this.options.candleStick.bodyWidth += 2
-    this.options.candleStick.gap += 1
-    const viewWidth = this.widthByKLine()
-    this.dataView.setViewWidth(viewWidth)
-    this.dataSerise.setSegmentRange(this.dataView.indexRange)
 
-    // 更新画面
-    this.chart.update()
-    */
+    // 更新数据
     // 更新画面
     this.chart.update()
   }
 
+  reset() {
+    this.dataView.reset()
+    this.calcViewAfterZoom()
+    return this
+  }
+  
+  // 放大
+  zoomIn() {
+    this.dataView.zoomIn()
+    this.calcViewAfterZoom()
+    return this
+  }
+
   // 缩小
   zoomOut() {
-    const step = 5
-    this.dataView.zoomOut(step)
+    this.dataView.zoomOut()
+    this.calcViewAfterZoom()
+    return this
+  }
+
+  // 重新计算尺寸
+  calcViewAfterZoom() {
     const viewWidth = this.dataView.viewWidth
     const klineWidth = this.chart.width / viewWidth
-    const bodyWidth = Math.floor(klineWidth) - 2
+    const floorKlineWidth = Math.floor(klineWidth)
+    let bodyWidth = 0
+    // 这一步确保bodyWidth在去除多余的部分后，始终为偶数。
+    // 确保bodyWidth为偶数的目的是，使得向下影线渲染的时候不模糊
+    if(floorKlineWidth % 2 == 0) {
+      // 偶数 - 2 还是偶数
+      bodyWidth = floorKlineWidth - 2
+    } else {
+      // 奇数 - 3 还是偶数
+      bodyWidth = floorKlineWidth - 3
+    }
     const gap = klineWidth - bodyWidth
     this.options.candleStick.bodyWidth = bodyWidth
     this.options.candleStick.gap = gap
-    // 修改数据视图的range
-    const range = this.dataView.indexRange
-
-    console.log('zoomOut', viewWidth)
-    console.log('-------------------------')
-    
-
     // 将range应用到数据
-    this.dataSerise.setSegmentRange(range)
-    /*
-    this.options.candleStick.bodyWidth -= 2
-    this.options.candleStick.gap -= 1
-    const viewWidth = this.widthByKLine()
-    console.log(viewWidth)
-    this.dataView.setViewWidth(viewWidth)
     this.dataSerise.setSegmentRange(this.dataView.indexRange)
 
+
+    // 更新数据
     // 更新画面
     this.chart.update()
-    */
-    // 更新画面
-    this.chart.update()
+    return this
   }
 
   /**

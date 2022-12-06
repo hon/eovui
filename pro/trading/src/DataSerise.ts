@@ -1,5 +1,5 @@
 import DataItem, { IDataItem } from "./DataItem"
-import options, { OptionType } from './utils/options'
+import {default as optionsUtil, OptionType } from './utils/options'
 
 type IndexRange = [number, number | undefined]
 
@@ -177,13 +177,10 @@ export default class DataSerise{
  * 操作的结果就是DataSerise#segmentData
  */
 export class ViewOnData {
-  // 数据总长度
-  totalDataLength: number
+
   options: OptionType
   viewWidth: number
   indexRange: IndexRange
-  zoomPoint: string
-  zoomDirection: string
   isOutOfView: boolean
 
 
@@ -195,40 +192,51 @@ export class ViewOnData {
       // 默认视图长度
       defaultViewWidth: 0,
 
-      // least data size remain in the view
-      minimalDataLength: 5,
+      // least data size remain in the view, but if the total data length is smaller than this 
+      // value, then this value will be total data length
+      minDataLength: 5,
+
 
       // 默认显示数据的长度和默认试图长度的比例
       defaultLengthRatio: 0.618,
+
+      minViewWidth: 8,
+      moveStep: 1,
+      zoomStep: 5,
+
+      // from which point to zoom
+      // center of the canvas, or
+      // the position of the cursor
+      zoomPoint: '',
+
+      // expand to left and right side, or
+      // just to left side
+      zoomDirection: 'expand',
+
+      // events
+      // on('zoom-in-end')
+      // on('zoom-out-end')
+      // on('move-left-end')
+      // on('move-right-end')
     }
 
-    this.setOptions(defaultOptions, options)
-
-    // 初始化this.#totalDataLength
-    this.totalDataLength = this.options.totalDataLength
-
+    this.options = optionsUtil.setOptions(defaultOptions, options)
     this.reset()
   }
 
-  setOptions(target: OptionType, source: OptionType) {
-    this.options = options.setOptions(target, source)
+  setOptions(newOptions: OptionType) {
+    // there are some options can not be set in the setOptions method.
+    // they need to be set individually in some methods.
+    const protectedOptions = []
+    this.options = optionsUtil.setOptions(this.options, newOptions)
     return this
   }
-  /*
-  setProp(name, value) {
-    // 简单设置
-    this[`#${name}`] = value
-
-    // todo 复杂设置, 调用各个属性的设置方法
-    return this
-  }
-  */
 
   /**
    * 可视区域的总长度, 该值会随着放大缩小一直改变
    */
   setViewWidth(width: number) {
-    width = width >= 8 ? width : 8
+    width = width >= this.options.minViewWidth ? width : this.options.minViewWidth
     this.viewWidth = width 
     return this
   }
@@ -236,32 +244,60 @@ export class ViewOnData {
 
   // 重置
   reset() {
+    const totalDataLength = this.options.totalDataLength
+    const minDataLength = this.options.minDataLength
+
     // 计算默认显示数据的长度
     let len = Math.floor(this.options.defaultViewWidth * this.options.defaultLengthRatio)
 
-    len = len > this.totalDataLength ? this.totalDataLength : len 
+    len = len > totalDataLength ? totalDataLength : len 
 
     // 索引范围
     this.indexRange = [-len, undefined]
 
-    this.isOutOfView = false
+    this.options.minDataLength = minDataLength > totalDataLength ? totalDataLength : minDataLength
+
+    this.checkOutOfView()
 
     // 总宽度
     this.setViewWidth(this.options.defaultViewWidth)
+
+    /*
+    console.log(this.options.defaultViewWidth)
+    console.log(this.indexRange)
+    console.log(this.viewWidth)
+    */
+    return this
+  }
+
+
+  checkOutOfView() {
+    // 计算是否超出视图
+    if (this.rangeDistance() > this.viewWidth) {
+      this.isOutOfView = true
+    } else {
+      this.isOutOfView = false
+    }
     return this
   }
 
   /**
-   * 移动, 视图是固定的，移动的是数据。
-   * @param {number} step - 移动步幅。往左移动为正数，往右移动为负数
+   * 向左移动, 视图是固定的，移动的是数据。
    */
-  move(step: number) {
+  moveLeft() {
+    const step = this.options.moveStep
+    return this.setRange(step, step)
+  }
+
+  moveRight() {
+    const step = -this.options.moveStep
     return this.setRange(step, step)
   }
 
   // 放大
-  zoomIn(step: number) {
-    if(this.viewWidth > 8) {
+  zoomIn() {
+    if(this.viewWidth > this.options.minViewWidth) {
+      const step = this.options.zoomStep
       // 左右各变化一个step
       this.setViewWidth(this.viewWidth - step * 2)
       this.setRange(+step, -step)
@@ -270,10 +306,10 @@ export class ViewOnData {
   }
 
   // 缩小
-  zoomOut(step: number) {
+  zoomOut() {
+    const step = this.options.zoomStep
     // 左右各变化一个step
     this.setViewWidth(this.viewWidth + step * 2)
-    console.log(`view width out zoomin: ${this.viewWidth}`)
     this.setRange(-step, +step)
     return this
   }
@@ -284,7 +320,7 @@ export class ViewOnData {
    *    2. center, 图表中心点的位置
    */
   setZoomPoint(point: string = 'cursor') {
-    this.zoomPoint = point
+    this.options.zoomPoint = point
     return this
   }
 
@@ -297,13 +333,16 @@ export class ViewOnData {
   setZoomDirection(direction: string = 'expand') {
     const directions = ['expand', 'left', 'right']
     if (directions.indexOf(direction) > -1) {
-      this.zoomDirection = direction
+      this.options.zoomDirection = direction
     } else {
       console.error('不支持的缩放方向')
     }
     return this
   }
 
+  /**
+   * Distance of the rangeIndex values
+   */
   rangeDistance() {
     const range = this.indexRange
     if (typeof range[1] == "undefined") {
@@ -327,15 +366,16 @@ export class ViewOnData {
       const range = this.indexRange
 
       // 往做成移动时，保证至少有多少数据在视图内
-      const remainLength = this.options.minimalDataLength
+      const remainLength = this.options.minDataLength
+      const totalDataLength = this.options.totalDataLength
       let first = range[0]
       let last = range[1]
 
       /** Step 1. 计算indexRange的第一个值 **/
       // 当所有的数据都加载完成，此时再继续往右移动的时候，要处理第一个元素的边界问题
       first += startStep
-      if (first < - this.totalDataLength) {
-        first = - this.totalDataLength
+      if (first < - totalDataLength) {
+        first = - totalDataLength
       }
 
       /** Step 2. 计算indexRange的第二个值 **/
@@ -344,7 +384,7 @@ export class ViewOnData {
       /** Step 2.1 第二项数据为undefined的情况 **/
       if (typeof last === 'undefined' && !this.isOutOfView) {
         if (
-          // 当数据往左移动时，要保留一定的数据，超出这个保留的数量就什么都不做
+          // 当数据移动时，要保留一定的数据，超出这个保留的数量就什么都不做
           // 否则视图里就没有数据了
           first > -remainLength) {
             return this
@@ -356,7 +396,7 @@ export class ViewOnData {
         /** Step 2.2 第二项数据为number的情况 **/
         // 当往右移动的时候，只要左侧没有到头就修改indexRagne的最后一个值
         // 换句话说，当往右移动数据到头了，就什么都不做
-        if (first >= - this.totalDataLength) {
+        if (first >= - totalDataLength) {
           // 多显示一条数据，表示此时尾部的数据是超出视图的。
           last = first + this.viewWidth + 1
         
@@ -369,16 +409,14 @@ export class ViewOnData {
 
       /** Step 3. 修改indexRange **/
       this.indexRange = [first, last]
+
+      this.checkOutOfView()
       
-      // 计算是否超出视图
-      if (this.rangeDistance() > this.viewWidth) {
-        this.isOutOfView = true
-      } else {
-        this.isOutOfView = false
-      }
+      /*
       console.log(this.indexRange)
       console.log(this.rangeDistance(), this.viewWidth)
       console.log(this.isOutOfView)
+      */
     }
     return this
   }
