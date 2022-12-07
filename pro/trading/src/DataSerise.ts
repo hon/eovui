@@ -182,10 +182,20 @@ export class ViewOnData {
   viewWidth: number
   indexRange: IndexRange
   isOutOfView: boolean
+  indexPercent: number
+
+  // which index is selected as the center point of zoom
+  selectedIndex: number
+
+  // there is no data to move right
+  isLeftEnd: boolean
+
+  // there is no data to move left (remain minDataLength)
+  isRightEnd: boolean
 
 
   constructor(options: OptionType) {
-    const defaultOptions = {
+    const defaultOptions: OptionType = {
       // 总数据的长度
       totalDataLength: 0,
 
@@ -200,28 +210,63 @@ export class ViewOnData {
       // 默认显示数据的长度和默认试图长度的比例
       defaultLengthRatio: 0.618,
 
-      minViewWidth: 8,
+      minViewWidth: 11,
       moveStep: 1,
-      zoomStep: 5,
+      zoomStep: 4,
+
+      // define rangees
+      // left region width: less than and equal to first element(45%) 
+      // center region width: greater than first element(45%) and less than last element(65%)
+      // right region width: greater than and equal to first element(65%)
+      regionRange: [0.45, 0.65],
 
       // from which point to zoom
-      // center of the canvas, or
-      // the position of the cursor
-      zoomPoint: '',
+      // 'left' :  means zoom from the left side of the (data) view
+      // 'right' : means zoom from the right side of the (data) view
+      // 'center': means zoom from the center point of the (data) view
+      zoomPoint: 'center',
 
-      // expand to left and right side, or
-      // just to left side
-      zoomDirection: 'expand',
 
-      // events
+      // Style of the zoom operation on data view
+      // fixied:  default value, the zoom point will always be left, right or center
+      // dynamic: the zoom point will be left, right or center occording to region calculation 
+      zoomStyle: 'dynamic',
+
+      // Events
+      // triggered just after start to zoom in
+      // on('zoom-in-start')
+      //
+      // triggered just after stop zoom in
       // on('zoom-in-end')
+      //
+      // triggered just after start to zoom out
+      // on('zoom-out-start')
+      // triggered just after stop zoom out
       // on('zoom-out-end')
+      //
+      // triggered just after start to move left
+      // on('move-left-start')
+      // triggered just after stop move left
       // on('move-left-end')
+      //
+      // triggered just after start to move right
+      // on('move-right-start')
+      // triggered just after stop move right
       // on('move-right-end')
+      //
+      // triggered when zoom or move to the maximum or minimum level
+      // on('zoom-in-over')
+      // on('zoom-out-over')
+      // on('move-left-over')
+      // on('move-right-over')
     }
 
     this.options = optionsUtil.setOptions(defaultOptions, options)
     this.reset()
+
+    
+    //this.updateIndexPercent(66)
+    //console.log(this._dividedRegion())
   }
 
   setOptions(newOptions: OptionType) {
@@ -233,6 +278,36 @@ export class ViewOnData {
   }
 
   /**
+   * Some stuffs need to be reset to the initial status
+   */
+  reset() {
+    const totalDataLength = this.options.totalDataLength
+    const minDataLength = this.options.minDataLength
+
+    this.isLeftEnd = false
+    this.isLeftEnd = false
+
+    // Calculate how many data need to be show 
+    let len = Math.floor(this.options.defaultViewWidth * this.options.defaultLengthRatio)
+    len = len > totalDataLength ? totalDataLength : len 
+    // 索引范围
+    this.indexRange = [-len, undefined]
+
+    this.options.minDataLength = minDataLength > totalDataLength ? totalDataLength : minDataLength
+
+    this.checkOutOfView()
+
+    // Set the view width
+    this.setViewWidth(this.options.defaultViewWidth)
+
+    // Set the center of the view as selected data index
+    this.selectedIndex = Math.floor(this.viewWidth / 2)
+
+    return this
+  }
+
+
+  /**
    * 可视区域的总长度, 该值会随着放大缩小一直改变
    */
   setViewWidth(width: number) {
@@ -241,38 +316,127 @@ export class ViewOnData {
     return this
   }
 
+  /**
+   * move the index data to the center 
+   */
+  moveToCenter(index: number) {
+    const viewCenter = Math.floor(this.viewWidth / 2)
+  }
 
-  // 重置
-  reset() {
-    const totalDataLength = this.options.totalDataLength
-    const minDataLength = this.options.minDataLength
+  /**
+   * The selected data index occupy how many percentage of the data view width
+   */
+  private _indexPercent() {
+    const viewWidth = this.viewWidth
+    const index = this.selectedIndex
+    this.indexPercent = (index + 1) / this.viewWidth
+    return this
+  } 
 
-    // 计算默认显示数据的长度
-    let len = Math.floor(this.options.defaultViewWidth * this.options.defaultLengthRatio)
+  /**
+   * Detect the selected data index in which region of the hole data view
+   */
+  private _dividedRegion() {
+    let regionRange = this.options.regionRange
 
-    len = len > totalDataLength ? totalDataLength : len 
+    let region = 'center'
+    const percent = this.indexPercent
+    // console.log(percent)
 
-    // 索引范围
-    this.indexRange = [-len, undefined]
+    if (percent <= regionRange[0]){
+      region = 'left'
+    }
+    if (percent >= regionRange[1]){
+      region = 'right'
+    }
+    return region
+  }
 
-    this.options.minDataLength = minDataLength > totalDataLength ? totalDataLength : minDataLength
+  /**
+   * Track the selected data index after move
+   * @param {number} step - zoom step
+   */
+  private _trackIndexAfterMove(step: number) {
+    if (!this.isLeftEnd && !this.isRightEnd) {
+      this.selectedIndex += step
+    }
+    console.log(this.selectedIndex)
+    return this
+  }
 
-    this.checkOutOfView()
+  /**
+   * Track the selected data index after zoom
+   * @param {number} step - zoom step
+   */
+  private _trackIndexAfterZoom(step: number) {
+    if (!this.isLeftEnd && !this.isRightEnd) {
+      const point = this.options.zoomPoint
+      if (point == 'center') {
+        this.selectedIndex += step
+      }
 
-    // 总宽度
-    this.setViewWidth(this.options.defaultViewWidth)
+      // if (point == 'left') {
+      //   this.selectedIndex += step
+      // }
+      
+      if (point == 'right') {
+        this.selectedIndex += step * 2
+      }
+    }
+    console.log(this.selectedIndex)
+    return this
+  }
+
+  /**
+   * Calculate the selected data index is in which region.
+   * So that we can dynamically change the zoom point to a better zoom experience.
+   *
+   * @param {number} step - move or zoom number
+   * @param {string} type - operation type of move and zoom
+   */
+  private _setZoomPointByRegion(step: number, type: string) {
+    if (this.options.zoomStyle == 'dynamic') {
+      let region = 'center'
+      if (type == 'moveLeft' || type == 'moveRight') {
+        region = this._trackIndexAfterMove(step)
+          ._indexPercent()
+          ._dividedRegion()
+        //console.log(region)
+      }
+      if (type == 'zoomIn' || type == 'zoomOut') {
+        region = this._trackIndexAfterZoom(step)
+          ._indexPercent()
+          ._dividedRegion()
+      }
+
+      // change the zoom point according by the region of selected (data) index
+      this.options.zoomPoint = region
+
+      if (type == 'zoomOut') {
+        if (region == 'left') {
+          this.options.zoomPoint = 'right'
+        }
+        if (region == 'right') {
+          this.options.zoomPoint = 'left'
+        }
+        
+      }
+    }
 
     /*
-    console.log(this.options.defaultViewWidth)
-    console.log(this.indexRange)
-    console.log(this.viewWidth)
+    console.log(`region: ${region}`)
+    console.log(`zoom point: ${this.options.zoomPoint}`)
     */
     return this
   }
 
 
+
+
+  /**
+   * Check whether the data is out if right side of the view
+   */
   checkOutOfView() {
-    // 计算是否超出视图
     if (this.rangeDistance() > this.viewWidth) {
       this.isOutOfView = true
     } else {
@@ -286,59 +450,74 @@ export class ViewOnData {
    */
   moveLeft() {
     const step = this.options.moveStep
+    this._setZoomPointByRegion(-step, 'moveLeft')
     return this.setRange(step, step)
   }
 
   moveRight() {
-    const step = -this.options.moveStep
-    return this.setRange(step, step)
+    const step = this.options.moveStep
+    this._setZoomPointByRegion(step, 'moveRight')
+    return this.setRange(-step, -step)
   }
 
-  // 放大
+  /**
+   * Zoom out of the data view
+   */
   zoomIn() {
     if(this.viewWidth > this.options.minViewWidth) {
       const step = this.options.zoomStep
+      const point = this.options.zoomPoint
+
       // 左右各变化一个step
       this.setViewWidth(this.viewWidth - step * 2)
+
       this.setRange(+step, -step)
+      if (point == 'right') {
+        //this.setRange(+step, -step)
+        // move to right
+        this.setRange(step, step)
+      } else if(point == 'left') {
+        //this.setRange(+step, -step)
+        // move to left
+        this.setRange(-step, -step)
+      } else {
+        // center
+        //this.setRange(+step, -step)
+      }
+
+      this._setZoomPointByRegion(-step, 'zoomIn')
     }
     return this
   }
 
-  // 缩小
+  /**
+   * Zoom out of the data view
+   */
   zoomOut() {
     const step = this.options.zoomStep
+    const point = this.options.zoomPoint
+
     // 左右各变化一个step
     this.setViewWidth(this.viewWidth + step * 2)
+
     this.setRange(-step, +step)
-    return this
-  }
-
-  /**
-   * 缩放点：从什么地方开始缩放，
-   *    1. cursor, 鼠标的位置
-   *    2. center, 图表中心点的位置
-   */
-  setZoomPoint(point: string = 'cursor') {
-    this.options.zoomPoint = point
-    return this
-  }
-
-  /**
-   * 缩放方向
-   *    1. expand, 从中心点往两边扩散
-   *    2. left, 往左缩放
-   *    3. right, 往右缩放
-   */
-  setZoomDirection(direction: string = 'expand') {
-    const directions = ['expand', 'left', 'right']
-    if (directions.indexOf(direction) > -1) {
-      this.options.zoomDirection = direction
+    if (point == 'right') {
+      //this.setRange(-step, +step)
+      // move to left
+      this.setRange(-step, -step)
+    } else if (point == 'left'){
+      //this.setRange(-step, +step)
+      // move to right
+      this.setRange(+step, +step)
     } else {
-      console.error('不支持的缩放方向')
+      // center
+      //this.setRange(-step, +step)
     }
+
+    this._setZoomPointByRegion(step, 'zoomOut')
     return this
   }
+
 
   /**
    * Distance of the rangeIndex values
@@ -363,6 +542,8 @@ export class ViewOnData {
    */
   setRange(startStep: number, endStep: number){
     if (startStep != 0 && endStep != 0) {
+      this.isLeftEnd = false
+      this.isRightEnd = false
       const range = this.indexRange
 
       // 往做成移动时，保证至少有多少数据在视图内
@@ -376,6 +557,13 @@ export class ViewOnData {
       first += startStep
       if (first < - totalDataLength) {
         first = - totalDataLength
+        this.isLeftEnd = true
+      }
+        // 当数据移动时，要保留一定的数据，超出这个保留的数量就什么都不做
+        // 否则视图里就没有数据了
+      if( first > -remainLength) {
+          this.isRightEnd = true
+          return this
       }
 
       /** Step 2. 计算indexRange的第二个值 **/
@@ -383,14 +571,8 @@ export class ViewOnData {
       // 数据已经在倒数第一个了
       /** Step 2.1 第二项数据为undefined的情况 **/
       if (typeof last === 'undefined' && !this.isOutOfView) {
-        if (
-          // 当数据移动时，要保留一定的数据，超出这个保留的数量就什么都不做
-          // 否则视图里就没有数据了
-          first > -remainLength) {
-            return this
-        }
 
-        last = undefined
+        //last = undefined
 
       } else {
         /** Step 2.2 第二项数据为number的情况 **/
