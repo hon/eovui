@@ -1,4 +1,4 @@
-import Layers, {Layer} from './Layers'
+import Layers, {Layer} from './layers'
 import options, { OptionType } from './utils/options'
 
 /**
@@ -171,5 +171,4 @@ export default class Chart {
     this.layers.draw()
     return this
   }
-  
 }

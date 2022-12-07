@@ -1,7 +1,9 @@
 import "./assets/style/index.scss"
 import DataItem from './DataItem'
 import Chart from './Chart'
-import MainChart, { MaChart, Cursor } from './MainChart'
+import MainChart from './layers/MainChart'
+import MaChart from './layers/MaChart'
+import Cursor from './layers/Cursor'
 import DataSerise from './DataSerise'
 
 function $(id: string) {
@@ -14,8 +16,8 @@ const zoomInEl = $('zoom-in')
 const zoomOutEl = $('zoom-out')
 const resetEl = $('reset')
 
-const symbol = '603327'
-const size = 150
+const symbol = '002423'
+const size = 300
 const chart = new Chart({
   selector: '#canvas1'
 })

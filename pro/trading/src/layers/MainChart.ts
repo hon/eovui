@@ -1,10 +1,9 @@
-import CandleStick from './CandleStick'
-import {Layer} from './Layers'
-import Coordinate from './Coordinate'
-import { ViewOnData } from './DataSerise'
-import Chart from './Chart'
-import {default as optionsUtil, OptionType } from './utils/options'
-
+import CandleStick from '../CandleStick'
+import { Layer } from './index'
+import Coordinate from '../Coordinate'
+import Chart from '../Chart'
+import {default as optionsUtil, OptionType } from '../utils/options'
+import ViewOnData from '../data/ViewOnData'
 
 
 /**
@@ -16,7 +15,6 @@ import {default as optionsUtil, OptionType } from './utils/options'
  * 除此之外，MainChart还有这些主要功能
  * 1. 价格和像素的（正向和反向）映射的api
  * 2. MainChart对象上有Chart和DataSerise的实例，因此可以通过MainChart使用Chart和DataSerise的相关api
- *
  */
 export default class MainChart extends Layer {
   options: OptionType
@@ -329,154 +327,4 @@ export default class MainChart extends Layer {
   }
 
 }
-
-/**
- * 移动平均线图表
- */
-export class MaChart extends Layer{
-  options: OptionType
-  mainChart: MainChart
-  chart: any
-  ctx: any
-  dataSerise: any
-  period: number
-  algoName: string
-  constructor(options: OptionType) {
-    super()
-    const defaultOptions = {
-      lineWidth: 1,
-      lineColor: '#ffcc33',
-      period: 5, 
-    }
-    this.options = optionsUtil.setOptions(defaultOptions, options)
-    this.mainChart = this.options.mainChart
-    this.chart = this.mainChart.chart
-    this.ctx = this.chart.ctx
-    this.dataSerise = this.mainChart.dataSerise
-
-    this.period = this.options.period
-    this.algoName = `ma${this.period}`
-  }
-
-  setOptions(newOptions: OptionType) {
-    this.options = optionsUtil.setOptions(this.options, newOptions)
-    return this
-  }
-
-  // 移动平均线算法
-  algo() {
-    const self = this
-    const ds = self.dataSerise
-    ds.addAlgo(self.algoName, (d: any) => {
-      
-      let maData = []
-      const n = self.period
-      const dataItems = ds.data.dataItems
-      const dataLen = dataItems.length
-
-      for (let i = 0; i < dataLen; i++) {
-        const copyData = dataItems.slice(dataLen - (n + i), dataLen - i)
-        if (copyData.length == n) {
-          const average = copyData.reduce((pre: any, cur: any) => pre + cur.close, 0) / n
-          maData.unshift(average)
-        } else {
-          maData.unshift(undefined)
-        }
-      }
-
-      return maData
-    })
-
-  }
-
-
-  // todo 可以将这里的绘图逻辑放到MainChart的绘图逻辑里。
-  draw() {
-    const self = this
-    const highestLowestPrice = this.dataSerise.highestLowestPrice()
-
-    // body的顶部，距离表上方的距离
-    const bodyWidth = self.mainChart.options.candleStick.bodyWidth
-
-    // 每个蜡烛图之间的间距
-    let gap = self.mainChart.options.candleStick.gap
-    const ctx = self.ctx
-    const dpr = window.devicePixelRatio
-
-    const maData = self.dataSerise.segmentData[`ma${self.period}`]
-
-    //ctx.save()
-    ctx.beginPath()
-    maData.forEach((item: any, idx: any) => {
-      if (idx >= self.period - 1) {
-        const x = idx * (bodyWidth + gap) / dpr + bodyWidth / 4
-        let y = self.chart.options.paddingTop / dpr
-        y += self.mainChart.coord.calcHeight((highestLowestPrice[0] - item)) / dpr
-        if (idx == self.period -1) {
-          ctx.moveTo(x, y)
-        } else {
-          ctx.lineTo(x, y)
-          ctx.strokeStyle = self.options.lineColor
-          ctx.lineWidth = self.options.lineWidth / dpr
-        }
-      }
-    })
-    ctx.stroke()
-    ctx.closePath()
-    //ctx.restore()
-  }
-}
-
-
-// 游标
-export class Cursor extends Layer {
-  options: OptionType
-  chart: Chart
-  constructor(options: OptionType) {
-    super()
-    const defaultOptions = {
-      cursor: 'crosshair'
-      
-    }
-    this.options = optionsUtil.setOptions(defaultOptions, options)
-
-    this.chart = this.options.chart
-
-    this.chart.canvas.style.cursor = this.options.cursor
-
-    const self = this
-    this.chart.mouseMoveEvent((evt: any) => {
-      self.chart.update()
-      this.drawLines(evt.mouseX, evt.mouseY)
-    })
-
-  }
-
-  setOptions(newOptions: OptionType) {
-    this.options = optionsUtil.setOptions(this.options, newOptions)
-    return this
-  }
-
-  drawLines(x: number, y: number) {
-    const ctx = this.chart.ctx
-    // ctx.save()
-    ctx.fillStyle = '#ffffff'
-
-    // 横线
-    ctx.fillRect(0, y, this.chart.width, 0.5)
-
-    // 纵线
-    ctx.fillRect(x, 0, 0.5, this.chart.height)
-
-    // ctx.restore()
-
-  }
-
-  draw() {
-    //this.chart.update()
-
-  }
-}
-
-
 
