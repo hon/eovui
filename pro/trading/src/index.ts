@@ -1,10 +1,10 @@
 import "./assets/style/index.scss"
-import DataItem from './DataItem'
+import DataItem from './data/DataItem'
 import Chart from './Chart'
 import MainChart from './layers/MainChart'
 import MaChart from './layers/MaChart'
 import Cursor from './layers/Cursor'
-import DataSerise from './DataSerise'
+import DataSerise from './data/DataSerise'
 
 function $(id: string) {
   return document.getElementById(id)
@@ -18,9 +18,6 @@ const resetEl = $('reset')
 
 const symbol = '002423'
 const size = 300
-const chart = new Chart({
-  selector: '#canvas1'
-})
 
 document.getElementById('load-data').addEventListener('click', evt => {
   const symbolEl = document.getElementById('symbol') as HTMLInputElement
@@ -34,11 +31,12 @@ function run(symbol: string, size: number, period = 'day') {
   fetch(`http://localhost:3001/v1/a-share/kline?symbol=${symbol}&size=${size}`)
     .then(res => res.json())
     .then(res => {
+
         
       const dataItems = res.map((item: any) => new DataItem(
         item.high, 
         item.open, 
-       item.close, 
+        item.close, 
         item.low, 
         item.time
       ))
@@ -46,30 +44,37 @@ function run(symbol: string, size: number, period = 'day') {
         dataItems
       })
 
+      const chart = new Chart({
+        selector: '#canvas1',
+        dataSerise,
+        /*
+        renderUnit: {
+          width: 20,
+          gap: 5,
+        }
+        */
+      })
+
       const kl = new MainChart({
         chart, 
-        dataSerise,
-        candleStick: {
-          bodyWidth: 10,
-          //gap: 9,
-        }
       })
 
       prevEl.addEventListener('click', async evt => {
         //await dataSerise.prependData(40)
-        kl.moveLeft()
+        chart.interaction.moveLeft()
       })
       nextEl.addEventListener('click', async evt => {
-        kl.moveRight()
+        chart.interaction.moveRight()
       })
       zoomInEl.addEventListener('click', async evt => {
-        kl.zoomIn()
+        chart.interaction.zoomIn()
       })
       zoomOutEl.addEventListener('click', async evt => {
-        kl.zoomOut()
+        chart.interaction.zoomOut()
       })
       resetEl.addEventListener('click', async evt => {
-        kl.reset()
+        //kl.reset()
+        chart.interaction.reset()
       })
 
       const ma5 = new MaChart({

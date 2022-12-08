@@ -1,4 +1,4 @@
-import options, { OptionType } from './utils/options'
+import options, { OptionType } from './../utils/options'
 /**
  * 蜡烛图, 绘制单个的蜡烛图
  */

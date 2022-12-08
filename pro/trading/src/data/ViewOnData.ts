@@ -179,7 +179,7 @@ export default class ViewOnData {
   } 
 
   /**
-   * Detect the selected data index in which region of the hole data view
+   * Detect the selected data index in which region of the whole data view
    */
   private _dividedRegion() {
     let regionRange = this.options.regionRange
@@ -205,7 +205,7 @@ export default class ViewOnData {
     if (!this.isLeftEnd && !this.isRightEnd) {
       this.selectedIndex += step
     }
-    console.log(this.selectedIndex)
+    //console.log(this.selectedIndex)
     return this
   }
 
@@ -448,4 +448,3 @@ export default class ViewOnData {
     return this
   }
 }
-

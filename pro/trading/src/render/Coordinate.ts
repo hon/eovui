@@ -1,4 +1,4 @@
-import { default as optionsUtil, OptionType } from './utils/options'
+import { default as optionsUtil, OptionType } from '../utils/options'
 /**
  * 坐标系统
  * 主要功能是:

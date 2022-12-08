@@ -1,5 +1,7 @@
 import Layers, {Layer} from './layers'
-import options, { OptionType } from './utils/options'
+import {default as optionsUtil, OptionType } from './utils/options'
+import Interaction from './render/Interaction'
+import DataSerise from './data/DataSerise'
 
 /**
  * 主图,
@@ -30,17 +32,21 @@ export default class Chart {
   layers: Layers
   canvasPosition: any
   mouseDown: boolean
+  interaction: Interaction
+  dataSerise: DataSerise
 
   /**
    * @param {OptionType} options - 配置选项 
    * ## 配置选项和对象属性
    * 配置项是对象初始化的时候用来配置的，如果用参数分别来传入，会使参数个数变多，可读性和可
    * 操作性差。配置项在传入的时候就不在改变了，如果需要改变，应该将该配置项复制到对象属性上。
-   * 因此他们主要的区别是看要不要改变。
+   * 属性是对象本身固有的。配置项是外部传入的。
    */
   constructor(options: OptionType) {
+    this.dataSerise = options.dataSerise
+
     // 默认数据项，当对象初始化时，传入的数据项如果没有设置相关的项，会使用默认配置项。
-    const defaultOptions = {
+    const defaultOptions: OptionType = {
      // canvas元素选择器
       selector: '',
 
@@ -49,14 +55,15 @@ export default class Chart {
       // 图表下方的padding
       paddingBottom: 100,
 
-      // 移动和缩放
-      // 缩放方向，参考ViewOnData#setZoomDirection
-      zoomDirection: 'expand',
-      // 缩放点, 参考ViewOnData#setZoomPoint
-      zoomPoint: 'cursor',
+      // 渲染单元信息, 主图里面（是蜡烛图)
+      renderUnit: {
+        width: 16,
+        gap: 2,
+      },
+
     }
 
-    this.setOptions(defaultOptions, options)
+    this.options = optionsUtil.setOptions(defaultOptions, options)
 
     
     const {
@@ -90,10 +97,15 @@ export default class Chart {
       self.mouseDown = false
     })
 
+    // 初始化Interaction
+    this.interaction = new Interaction({
+      chart: this,
+    })
+
   }
 
   setOptions(target: OptionType, source: OptionType) {
-    this.options = options.setOptions(target, source)
+    this.options = optionsUtil.setOptions(target, source)
     return this
   }
 
@@ -165,9 +177,7 @@ export default class Chart {
    * Update the canvas
    */
   update() {
-    //this.ctx.save()
     this.ctx.clearRect(0, 0, this.width, this.width)
-    //this.ctx.restore()
     this.layers.draw()
     return this
   }

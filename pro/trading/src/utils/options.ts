@@ -14,6 +14,7 @@ export function isObject(value: any): boolean {
 const options = {
   /**
    * Deep merge default and new options
+   * WARNING: this function only merges enumerable properties!
    * Reference:  https://stackoverflow.com/questions/27936772/how-to-deep-merge-instead-of-shallow-merge?
    * noredirect=1&lq=1
    *
