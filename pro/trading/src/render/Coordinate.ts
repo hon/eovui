@@ -1,4 +1,5 @@
-import { default as optionsUtil, OptionType } from '../utils/options'
+import { optionsUtil, OptionType } from '@eovui/utils'
+
 /**
  * 坐标系统
  * 主要功能是:

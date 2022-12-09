@@ -1,6 +1,6 @@
 import { Layer } from './index'
 import Chart from '../Chart'
-import {default as optionsUtil, OptionType } from '../utils/options'
+import { optionsUtil, OptionType } from '@eovui/utils'
 
 // 游标
 export default class Cursor extends Layer {

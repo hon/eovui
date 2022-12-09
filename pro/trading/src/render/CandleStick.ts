@@ -1,4 +1,4 @@
-import options, { OptionType } from './../utils/options'
+import { optionsUtil, OptionType } from '@eovui/utils'
 /**
  * 蜡烛图, 绘制单个的蜡烛图
  */
@@ -55,7 +55,7 @@ export default class CandleStick {
   }
 
   setOptions(target: OptionType, source: OptionType) {
-    this.options = options.setOptions(target, source)
+    this.options = optionsUtil.setOptions(target, source)
     return this
   }
 

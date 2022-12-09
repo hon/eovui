@@ -1,6 +1,6 @@
 import { Layer } from './index'
 import MainChart from './MainChart'
-import {default as optionsUtil, OptionType } from '../utils/options'
+import { optionsUtil, OptionType } from '@eovui/utils'
 
 /**
  * 移动平均线图表

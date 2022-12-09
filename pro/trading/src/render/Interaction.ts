@@ -1,8 +1,8 @@
 import Coordinate from "./Coordinate";
 import ViewOnData from "../data/ViewOnData";
 import Chart from "../Chart";
+import { optionsUtil, OptionType } from '@eovui/utils'
 
-import {default as optionsUtil, OptionType} from "../utils/options";
 export default class Interaction {
 
   options: OptionType

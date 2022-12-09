@@ -2,7 +2,7 @@
  * Wrapper of native Event apis of the browser
  */
 
-import {default as optionsUtil, OptionType} from "./utils/options";
+import {default as optionsUtil, OptionType} from "./../options";
 
 export default class Evt {
   options: OptionType

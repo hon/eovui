@@ -1,9 +1,7 @@
 import CandleStick from '../render/CandleStick'
 import { Layer } from './index'
-import Coordinate from '../render/Coordinate'
 import Chart from '../Chart'
-import {default as optionsUtil, OptionType } from '../utils/options'
-import ViewOnData from '../data/ViewOnData'
+import { optionsUtil, OptionType } from '@eovui/utils'
 
 
 /**

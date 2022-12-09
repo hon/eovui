@@ -1,8 +1,8 @@
 import Layers, {Layer} from './layers'
-import {default as optionsUtil, OptionType } from './utils/options'
 import Interaction from './render/Interaction'
 import DataSerise from './data/DataSerise'
-import Evt from "./evt"
+import { Evt, optionsUtil, OptionType } from '@eovui/utils'
+
 
 /**
  * 主图,

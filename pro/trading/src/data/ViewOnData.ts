@@ -1,4 +1,4 @@
-import {default as optionsUtil, OptionType } from '../utils/options'
+import { optionsUtil, OptionType } from '@eovui/utils'
 type IndexRange = [number, number | undefined]
 
 
