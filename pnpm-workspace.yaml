@@ -2,4 +2,5 @@ packages:
   - 'base/*'
   - 'pro/*'
   - 'libs/*'
+  - 'apps/*'
   - 'integrations/*'
