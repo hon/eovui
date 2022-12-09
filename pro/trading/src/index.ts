@@ -27,6 +27,10 @@ document.getElementById('load-data').addEventListener('click', evt => {
   run(symbolVal, parseInt(sizeVal))
 }, false)
 
+$('canvas1').addEventListener('eov-move-start', evt => {
+  console.log(`Event Fired:`, evt)
+})
+
 function run(symbol: string, size: number, period = 'day') {
   fetch(`http://localhost:3001/v1/a-share/kline?symbol=${symbol}&size=${size}`)
     .then(res => res.json())

@@ -10,10 +10,10 @@ export default class DataGrid {
     this.plugins = new PluginManager();
   }
 
-  render(mount: HTMLElement) {
+  mount(el: HTMLElement) {
     const view = new View()
     this.view = view
-    mount.append(view.el)
+    el.append(view.el)
   }
 
   /**
@@ -33,4 +33,4 @@ const dg = new DataGrid({})
 
 // register `my-first-plugin`
 dg.registerPlugin(new MyFirstPlugin('my-first-plugin'), {})
-dg.render(document.body)
+dg.mount(document.body)

@@ -2,6 +2,7 @@ import Layers, {Layer} from './layers'
 import {default as optionsUtil, OptionType } from './utils/options'
 import Interaction from './render/Interaction'
 import DataSerise from './data/DataSerise'
+import Evt from "./evt"
 
 /**
  * 主图,
@@ -34,6 +35,7 @@ export default class Chart {
   mouseDown: boolean
   interaction: Interaction
   dataSerise: DataSerise
+  easyEvent: Evt
 
   /**
    * @param {OptionType} options - 配置选项 
@@ -83,6 +85,11 @@ export default class Chart {
     //this.mouseMoveEvent()
     this.canvasPosition = this.canvas.getBoundingClientRect()
     this.mouseDown = false
+
+    // 创建自定义事件，所有的事件都绑定到this.canvas元素上
+    this.easyEvent = new Evt({
+      target: this.canvas
+    })
 
     const self = this
     window.addEventListener('resize', () => {

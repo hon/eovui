@@ -8,7 +8,34 @@ export default class Interaction {
   options: OptionType
   coordinate: Coordinate
   viewOnData: ViewOnData
-  #chart: Chart
+  chart: Chart
+  // Events
+  // triggered just after start to zoom in
+  // on('zoom-in-start')
+  //
+  // triggered just after stop zoom in
+  // on('zoom-in-end')
+  //
+  // triggered just after start to zoom out
+  // on('zoom-out-start')
+  // triggered just after stop zoom out
+  // on('zoom-out-end')
+  //
+  // triggered just after start to move left
+  // on('move-left-start')
+  // triggered just after stop move left
+  // on('move-left-end')
+  //
+  // triggered just after start to move right
+  // on('move-right-start')
+  // triggered just after stop move right
+  // on('move-right-end')
+  //
+  // triggered when zoom or move to the maximum or minimum level
+  // on('zoom-in-over')
+  // on('zoom-out-over')
+  // on('move-left-over')
+  // on('move-right-over')
   // 鼠标的位置
   mousePosition: {x: number, y: number}
 
@@ -16,7 +43,7 @@ export default class Interaction {
   centerPoint: {x: number, y: number}
 
   constructor(options: OptionType) {
-    this.#chart = options.chart
+    this.chart = options.chart
 
     const defaultOptions: OptionType = {
       // coordinateOptions: {},
@@ -25,7 +52,7 @@ export default class Interaction {
 
     this.options = optionsUtil.setOptions(defaultOptions, options)
 
-    const chart = this.#chart
+    const chart = this.chart
     const dataSerise = chart.dataSerise
 
     // 最高价和最低价
@@ -64,7 +91,7 @@ export default class Interaction {
     const self = this
 
     // 鼠标移动事件
-    this.#chart.mouseMoveEvent(async (evt: any) => {
+    this.chart.mouseMoveEvent(async (evt: any) => {
       self.mousePosition = {x: evt.mouseX, y: evt.mouseY}
       const priceRange = dataSerise.highestLowestPrice()
       coord.updateData({
@@ -73,10 +100,10 @@ export default class Interaction {
       })
       const dataIndex = coord.calcDataIndex(evt.mouseX)
       //const price = self.calcDataValue(evt.mouseY)
-      console.log(dataIndex, dataSerise.segmentData.dataItems[dataIndex])
+      //console.log(dataIndex, dataSerise.segmentData.dataItems[dataIndex])
 
       const price = coord.calcDataValue(evt.mouseY)
-      console.log(price)
+      //console.log(price)
 
     })
 
@@ -101,6 +128,11 @@ export default class Interaction {
   }
 
   moveLeft() {
+    this.chart.easyEvent.emit('move-start', {
+      detail: {
+        direction: 'left'
+      }
+    })
     const chart = this.options.chart
 
     // 修改数据视图的range
@@ -112,9 +144,20 @@ export default class Interaction {
     // 更新数据
     // 更新画面
     chart.update()
+    this.chart.easyEvent.emit('move-end', {
+      detail: {
+        direction: 'left'
+      }
+    })
+    return this
   }
 
   moveRight() {
+    this.chart.easyEvent.emit('move-start', {
+      detail: {
+        direction: 'right'
+      }
+    })
     const chart = this.options.chart
     // 修改数据视图的range
     const range = this.viewOnData.moveRight().indexRange
@@ -124,11 +167,17 @@ export default class Interaction {
 
     // 更新画面
     chart.update()
+    this.chart.easyEvent.emit('move-end', {
+      detail: {
+        direction: 'right'
+      }
+    })
+    return this
 
   }
 
   zoomIn() {
-    const chart = this.#chart
+    const chart = this.chart
     this.viewOnData.zoomIn()
     this.calcDataViewWidth()
     // 更新画面
@@ -137,7 +186,7 @@ export default class Interaction {
   }
 
   reset() {
-    const chart = this.#chart
+    const chart = this.chart
     this.viewOnData.reset()
     this.calcDataViewWidth()
     // 更新画面
@@ -146,11 +195,22 @@ export default class Interaction {
   }
 
   zoomOut() {
-    const chart = this.#chart
+    this.chart.easyEvent.new('zoom-start', {
+      detail: {
+        direction: 'out'
+      }
+    })
+    const chart = this.chart
     this.viewOnData.zoomOut()
     this.calcDataViewWidth()
     // 更新画面
     chart.update()
+
+    this.chart.easyEvent.new('zoom-end', {
+      detail: {
+        direction: 'out'
+      }
+    })
     return this
   }
 
@@ -158,7 +218,7 @@ export default class Interaction {
    * (重新)计算数据视图宽度
    */
   calcDataViewWidth() {
-    const chart = this.#chart
+    const chart = this.chart
     const viewWidth = this.viewOnData.viewWidth
     const unitWidth = chart.width / viewWidth
     const floorUnitWidth = Math.floor(unitWidth)

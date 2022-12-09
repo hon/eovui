@@ -24,10 +24,12 @@ export class PluginManager {
   }
 }
 
-// some implements of IPlugin
+// Some implements of IPlugin
 export default class Plugin implements IPlugin {
   name: string
-  datagrid: DataGrid
+
+  // The object with the core apis of some library
+  core: unknown
 
   // every plugin should hava a namespace to avoid effect other plugin's functionality
   private namespace: string
@@ -37,8 +39,8 @@ export default class Plugin implements IPlugin {
     this.namespace = `eovui.datagrid.${name}`
   }
 
-  init(datagrid: DataGrid, options: OptionType): IPlugin{
-    this.datagrid = datagrid
+  init(core: unknown, options: OptionType): IPlugin{
+    this.core = core 
     return this
   }
   run(): void {}
