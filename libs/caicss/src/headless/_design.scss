@@ -1,0 +1,152 @@
+// 设计系统的基本信息
+/*
+ * 设置css变量
+ */
+//////// Global Variables //////
+// SCSS Variables
+
+//-- 基本色
+// 主色
+// 生成工具：https://ant.design/docs/spec/colors-cn
+// 硬编码主色系列
+$primary-colors: 
+#f0fcff,
+#def7ff,
+#b5eaff,
+#8cdbff,
+#63c9ff,
+#37aaf1,
+#2586cc,
+#1665a6,
+#0a4780,
+#062e59
+;
+
+// 次色
+// 参考：https://element-plus.gitee.io/zh-CN/component/color.html
+$success-colors:
+#f0fff1,
+#edfff0,
+#bef7c8,
+#8feba1,
+#64de80,
+#3dd264,
+#29ab50,
+#19853d,
+#0d5e2b,
+#07381b
+;
+
+$warning-colors:
+#fffcf0,
+#fff7de,
+#ffebb5,
+#ffdd8c,
+#ffcb63,
+#f1ac37,
+#cc8925,
+#a66716,
+#80490a,
+#593006
+;
+
+$error-colors:
+#fff2f0,
+#ffedeb,
+#ffc8c2,
+#ffa099,
+#fa736e,
+#ee4343,
+#c72e33,
+#a11d26,
+#7a101b,
+#540a14
+;
+
+//$info-colors: 
+  //#fafafa;
+
+
+// 中性色
+$neutral-colors:
+  #ffffff, // 1
+  #fafafa, // 2
+  #f5f5f5,
+  #f0f0f0,
+  #d9d9d9,
+  #bfbfbf,
+  #8c8c8c,
+  #595959,
+  #434343,
+  #262626,
+  #1f1f1f,
+  #141414,
+  #000000;
+
+//-- Size
+$border-radius: (
+  small: 2px,
+  medium: 4px,
+  large: 8px
+);
+
+// 参考：https://ant.design/docs/spec/shadow-cn#%E9%98%B4%E5%BD%B1%E5%80%BC
+$box-shadow: (
+  // todo
+  level-1: 10px, 
+);
+
+// text shadow 
+$text-shadow: ();
+
+
+//-- Text
+$font-family: Microsoft YaHei;
+$font-weight: (
+  regular: 400,
+  medium: 500,
+  semibold: 600,
+);
+$font-color: (
+  "title": rgba(0, 0, 0, 0.85),
+  "primary-text": rgba(0, 0, 0, 0.85),
+  "secondary-text": rgba(0, 0, 0, 0.45),
+  "disable": rgba(0, 0, 0, 0.30),
+  "border": rgba(0, 0, 0, 0.20),
+  "divider": rgba(0, 0, 0, 0.12),
+  "background": rgba(0, 0, 0, 0.08),
+  "table-header": rgba(0, 0, 0, 0.04),
+);
+$font-size-pair: 
+  (
+    "font-size": 12px,
+    "line-height": 20px
+  ),
+  // main font size
+  (
+    "font-size": 14px,
+    "line-height": 22px
+  ),
+  (
+    "font-size": 16px,
+    "line-height": 24px
+  ),
+  (
+    "font-size": 20px,
+    "line-heihgt": 28px
+  ),
+  (
+    "font-size": 24px,
+    "line-heihgt": 32px
+  ),
+  (
+    "font-size": 30px,
+    "line-heihgt": 38px
+  ),
+  (
+    "font-size": 38px,
+    "line-heihgt": 46px
+  );
+
+
+//-- Image

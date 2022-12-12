@@ -1,0 +1,76 @@
+@use 'design' as *;
+@use './config' as *;
+@use 'sass:map';
+
+// css 变量，为了实现css的扩展
+:root {
+  /* General Color */
+  // 生成css变量
+  @for $i from 1 through 10 {
+    #{$vp}-primary-color-#{$i}: #{nth($primary-colors, $i)};
+  }
+
+  // primary color
+  #{$vp}-primary-color: var(#{$vp}-primary-color-6);
+
+  // success color
+  @for $i from 1 through 10 {
+    #{$vp}-success-color-#{$i}: #{nth($success-colors, $i)};
+  }
+
+  // warning color
+  @for $i from 1 through 10 {
+    #{$vp}-warning-color-#{$i}: #{nth($warning-colors, $i)};
+  }
+
+  // error color
+  @for $i from 1 through 10 {
+    #{$vp}-error-color-#{$i}: #{nth($error-colors, $i)};
+  }
+  // info color
+  @for $i from 1 through 10 {
+    #{$vp}-info-color-#{$i}: #{nth($neutral-colors, $i + 1)};
+  }
+
+  // neutral color
+  @for $i from 1 through 13 {
+    #{$vp}-neutral-color-#{$i}: #{nth($neutral-colors, $i)};
+  }
+
+
+  /* Border Radius */
+  @each $k, $v in $border-radius {
+    #{$vp}-#{$k}-border-radius: #{$v};
+  }
+
+  /* Font */
+  /*font family */
+  #{$vp}-font-family: #{$font-family};
+
+  /* font weight */
+  @each $k, $v in $font-weight {
+    #{$vp}-#{$k}-font-weight: $v;
+  }
+  
+  // size and line-height
+  @for $i from 1 through length($font-size-pair) {
+    $pair: nth($font-size-pair, $i);
+
+    @each $k, $v in $pair {
+      #{$vp}-#{$k}-#{$i}: $v;
+    }
+  }
+
+  // color
+  /* font-color */
+  @each $k, $v in $font-color {
+    #{$vp}-#{$k}-color: $v;
+  }
+
+
+  transition: 0.2s;
+  color: var(#{$vp}-primary-text-color);
+  font-size: var(#{$vp}-font-size-2);
+
+}
+ 
