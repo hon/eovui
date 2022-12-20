@@ -1,4 +1,6 @@
 import EovElement from "../eov"
+EovElement.prefix = 'new'
+
 import { addTemplateElement as template } from "../utils"
 // 实现参考：
 // https://web-components.carbondesignsystem.com/?path=/docs/components-button--default
@@ -9,11 +11,8 @@ export default class Button extends EovElement{
   // 是否给class属性里面的值增加前缀
   prefixClassName: boolean
 
-  static instances: Button[] = []
-
   constructor(opts: any) {
     super(opts)
-
     this.prefixClassName = true
   }
 
@@ -39,13 +38,6 @@ export default class Button extends EovElement{
       </span>
     `
 
-    Button.instances.push(this)
-
-    Button.instances.forEach((_, idx) => {
-      this.setAttribute('instances-id', `${Button.tagName}-${idx}`)
-    })
-
-    console.log(Button.instances)
     let tplEl = template(htmlString, {}, shadow)
     let content = tplEl.content.cloneNode(true)
     shadow.append(content)
@@ -54,8 +46,6 @@ export default class Button extends EovElement{
   }
 
 
-  // 覆盖默认addClass行为
-  addClass() {}
 
   // 设置默认属性
   #setDefaultAttrs() {
@@ -66,11 +56,5 @@ export default class Button extends EovElement{
       this.setAttribute('tabindex', '0')
     }
   }
-
-  /*
-  static define(name: string = 'button') {
-    super.define(name)
-  }
-  */
 
 }

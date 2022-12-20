@@ -5,6 +5,7 @@ const process = require("process")
 
 const execDirName = process.cwd()
 
+
 module.exports = {
   experiments: {
     outputModule: true,
@@ -13,7 +14,7 @@ module.exports = {
     index: './src/index.ts',
   },
   output: {
-    filename: 'index.js',
+    filename: '[name].js',
     path: path.resolve(execDirName/*__dirname*/, 'dist'),
     clean: true,
     // default assets path and name
