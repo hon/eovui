@@ -1,0 +1,5 @@
+/// Button 组件
+@use '~@eovui/caicss/src/headless/components/button' with (
+  $pc: 'eov-button',
+  $vpc: '--eov--button'
+);
