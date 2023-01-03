@@ -2,7 +2,7 @@
  * Wrapper of HTMLElement
  */
 
-export default class EovElement extends HTMLElement {
+export default class HTMLEovElement extends HTMLElement {
   constructor(opts: unknown) {
     super()
   }
@@ -36,11 +36,11 @@ export default class EovElement extends HTMLElement {
   static define(
     name: string,
     c: CustomElementConstructor = this.prototype.constructor as CustomElementConstructor) {
-    this.tagName = `${EovElement.prefix}-${name}`
+    this.tagName = `${HTMLEovElement.prefix}-${name}`
     
     // Do not define more then once
     if (window.customElements.get(this.tagName) === undefined) {
-      window.customElements.define(`${EovElement.prefix}-${name}`, c)
+      window.customElements.define(`${HTMLEovElement.prefix}-${name}`, c)
     }
   }
   

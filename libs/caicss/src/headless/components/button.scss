@@ -1,0 +1,209 @@
+@use 'sass:color';
+@use 'sass:map';
+
+@use './../../config' as *;
+@use './../../functions' as *;
+
+@use './../design' as *;
+@use './../var' as *;
+
+@function get-color($name, $idx, $val: false) {
+  $nm: (
+    'primary': $primary-colors,
+    'success': $success-colors,
+    'warning': $warning-colors,
+    'error': $error-colors,
+    'info': $neutral-colors,
+  );
+  @return get-color-by-name($name, $idx, $val, $nm);
+}
+
+// variables prefix of component
+// 组件自有的变量前缀
+// 如果需要向外部暴露css变量，使用该前缀
+$vpc: "#{$vp}-button" !default;
+$pc: "#{$p}-button" !default;
+
+:host {}
+
+// css 实现
+#{$pc} {
+  &.ghost,
+  &.outlined,
+  &.dashed,
+  &.contained,
+  &.text,
+  {
+    border-radius: var(#{$vpc}-radius, 3px);
+    padding: var(#{$vpc}-padding, 5px 18px);
+    outline: 0;
+  }
+  &.ghost,
+  &.outlined,
+  &.dashed {
+    @mixin state($type) {
+      &:hover,
+      &:focus{
+        color: var(get-color($type, 8));
+        background: var(get-color($type, 2));
+        border-color: var(get-color($type, 4));
+      }
+      &:active {
+        // 修改颜色透明度
+        //$rgba: color.change(get-color($type, 7, true), $alpha: 0.2);
+        //outline: 4px solid #{$rgba};
+        border-color: var(get-color($type, 6));
+      }
+    }
+
+    @mixin disabled-state($type) {
+      $color-idx: 4;
+      $bg-idx: 2;
+      $border-color-idx: 3;
+      @if $type == 'neutral'{
+        $color-idx: 6;
+        $bg-idx: 1;
+        $border-color-idx: 5;
+      }
+      color: var(get-color($type, $color-idx));
+      background: var(get-color($type, $bg-idx));
+      border-color: var(get-color($type, $border-color-idx));
+    }
+
+    @mixin default-and-state($type) {
+      &.#{$type}{
+        color: var(get-color($type, 7));
+        background: var(get-color($type, 1));
+        border-color: var(get-color($type, 3));
+        @include state($type);
+        &[aria-disabled="true"] {
+          @include disabled-state($type);
+        }
+      }
+    }
+
+    border-color: var(get-color('neutral', 6));
+    @include state('primary');
+    &[aria-disabled="true"] {
+      @include disabled-state('neutral');
+    }
+    @include default-and-state('success');
+    @include default-and-state('warning');
+    @include default-and-state('error');
+    @include default-and-state('info');
+  }
+  &.dashed {
+    border-style: dashed;
+  }
+
+  &.contained,
+  &.primary {
+    #{$vpc}-change-color: get-color('primary', 6, true);
+    color: white;
+    background: var(#{$vpc}-change-color);
+    border-color: var(#{$vpc}-change-color);
+    @mixin state($type) {
+      &:hover,
+      &:focus {
+        #{$vpc}-change-color: get-color($type, 7, true);
+      }
+      &:active {
+        #{$vpc}-change-color: get-color($type, 8, true);
+      }
+    }
+    @mixin disabled-state($type) {
+      $idx: 4;
+      @if $type == 'info' {
+        $idx: 5;
+      }
+      #{$vpc}-change-color: get-color($type, $idx, true);
+    }
+
+    @mixin default-and-state($type) {
+      $idx: 4;
+      @if $type == 'info' {
+        $idx: 5;
+      }
+      &.#{$type} {
+        #{$vpc}-change-color: get-color($type, 6, true);
+        @include state($type);
+        &[aria-disabled="true"] {
+          @include disabled-state($type);
+        }
+      }
+
+    }
+    @include state('primary');
+    &[aria-disabled="true"] {
+      @include disabled-state('primary');
+    }
+    @include default-and-state('success');
+    @include default-and-state('warning');
+    @include default-and-state('error');
+    @include default-and-state('info');
+  }
+
+
+  &.text {
+    border-color: transparent;
+    @mixin state($type) {
+      &:hover,
+      &:focus {
+        color: var(get-color($type, 8));
+        background: var(get-color($type, 1));
+      }
+      &:active{
+        background: var(get-color($type, 2));
+      }
+    }
+
+    @mixin disabled-state($type) {
+      $idx: 5;
+      @if $type == 'neutral' {
+        $idx: 7;
+      }
+      color: var(get-color($type, $idx));
+      background: transparent;
+    }
+
+    @mixin default-and-state($type) {
+      &.#{$type} {
+        color: var(get-color($type, 7));
+        @include state($type);
+        &[aria-disabled="true"] {
+          @include disabled-state($type);
+        }
+      }
+    }
+
+    @include state('primary');
+    &[aria-disabled="true"] {
+      //color: var(get-color('neutral', 7));
+      @include disabled-state('neutral');
+    }
+    @include default-and-state('success');
+    @include default-and-state('warning');
+    @include default-and-state('error');
+    @include default-and-state('info');
+  }
+
+  &.small {
+    font-size: var(#{$vp}-font-size-1);
+    padding: 2px 10px;
+    border-radius: 2px;
+  }
+  &.large {
+    font-size: var(#{$vp}-font-size-4);
+    padding: 8px 30px;
+    border-radius: 5px;
+  }
+  &.round {
+    border-radius: 666px;
+  }
+
+  &[aria-disabled="true"] {
+    cursor: not-allowed;
+  }
+}
+
+

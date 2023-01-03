@@ -3,16 +3,141 @@
 <head>
   <meta charset="UTF-8">
   <title>Button</title>
-  <style>
-    *{
-      padding: 0;
-      margin: 0;
-    }
-  </style>
 </head>
-<body class="eovui-web eovui-headless-system eovui-light-theme">
+<body>
+<body class="eov-web eov-headless-system eov-light-theme">
   <!-- 通过html的方式实例化组件 -->
-  <eov-button>New button</eov-button>
+  <h1>Primary Button</h1>
+  <section>
+    <eov-button class="contained">Default</eov-button>
+    <eov-button class="contained">
+      <eov-icon class="small">
+        <svg viewBox="0 0 1024 1024" focusable="false" data-icon="step-backward" aria-hidden="true"><path d="M347.6 528.95l383.2 301.02c14.25 11.2 35.2 1.1 35.2-16.95V210.97c0-18.05-20.95-28.14-35.2-16.94L347.6 495.05a21.53 21.53 0 000 33.9M330 864h-64a8 8 0 01-8-8V168a8 8 0 018-8h64a8 8 0 018 8v688a8 8 0 01-8 8"></path></svg>
+      </eov-icon>
+      <span>Default</span>
+    </eov-button>
+    <eov-button class="contained success">Success</eov-button>
+    <eov-button class="contained warning">Warning</eov-button>
+    <eov-button class="contained error">Error</eov-button>
+    <eov-button class="contained info">Info</eov-button>
+  </section>
+
+  <h1>Secondary Button</h1>
+  <section>
+    <eov-button class="outlined">Default</eov-button>
+    <eov-button class="outlined success">Success</eov-button>
+    <eov-button class="outlined warning">Warning</eov-button>
+    <eov-button class="outlined error">Error</eov-button>
+    <eov-button class="outlined info">Info</eov-button>
+  </section>
+
+
+  <h1>Dashed Button</h1>
+  <section>
+    <eov-button class="dashed">Default</eov-button>
+    <eov-button class="dashed success">Success</eov-button>
+    <eov-button class="dashed warning">Warning</eov-button>
+    <eov-button class="dashed error">Error</eov-button>
+    <eov-button class="dashed info">Info</eov-button>
+  </section>
+
+  <h1>Text Button</h1>
+  <section>
+    <eov-button class="text">Default</eov-button>
+    <eov-button class="text success">Success</eov-button>
+    <eov-button class="text warning">Warning</eov-button>
+    <eov-button class="text error">Error</eov-button>
+    <eov-button class="text info">Info</eov-button>
+  </section>
+
+
+  <h1>按照尺寸分类</h1>
+  <section>
+    <h2>小尺寸：</h2>
+    <eov-button class="contained small">Primary Button</eov-button>
+    <eov-button class="ghost small">Default Button</eov-button>
+    <eov-button class="dashed small">Dashed Button</eov-button>
+    <eov-button class="text small">Text Button</eov-button>
+  </section>
+
+  <section>
+    <h2>默认(中)尺寸：</h2>
+    <eov-button class="contained">Primary Button</eov-button>
+    <eov-button class="ghost">Default Button</eov-button>
+    <eov-button class="dashed">Dashed Button</eov-button>
+    <eov-button class="text">Text Button</eov-button>
+  </section>
+
+  <section>
+    <h2>大尺寸：</h2>
+    <eov-button class="contained large">Primary Button</eov-button>
+    <eov-button class="ghost large">Default Button</eov-button>
+    <eov-button class="dashed large">Dashed Button</eov-button>
+    <eov-button class="text large">Text Button</eov-button>
+  </section>
+
+  <section>
+    <h1>按照形状分类</h1>
+    <div class="row">
+      <eov-button class="contained small round">Contained Button</eov-button>
+      <eov-button class="ghost small round ">Ghost Button</eov-button>
+      <eov-button class="small dashed round">Dashed Button</eov-button>
+      <eov-button class="text round small">Contained Button</eov-button>
+    </div>
+    <div class="row">
+      <eov-button class="contained round">Contained Button</eov-button>
+      <eov-button class="ghost round ">Ghost Button</eov-button>
+      <eov-button class="dashed round">Dashed Button</eov-button>
+      <eov-button class="text round">Contained Button</eov-button>
+    </div>
+    <div>
+      <eov-button class="large contained round">Contained Button</eov-button>
+      <eov-button class="large ghost round ">Ghost Button</eov-button>
+      <eov-button class="large dashed round">Dashed Button</eov-button>
+      <eov-button class="large text round">Contained Button</eov-button>
+    </div>
+  </section>
+
+  <section>
+    <h1>禁用状态</h1>
+    <h2>Primary Button</h2>
+    <section>
+      <eov-button aria-disabled="true" class="contained">Default</eov-button>
+      <eov-button aria-disabled="true" class="contained success">Success</eov-button>
+      <eov-button aria-disabled="true" class="contained warning">Warning</eov-button>
+      <eov-button aria-disabled="true" class="contained error">Error</eov-button>
+      <eov-button aria-disabled="true" class="contained info">Info</eov-button>
+    </section>
+
+    <h2>Secondary Button</h2>
+    <section>
+      <eov-button aria-disabled="true" class="ghost">Default</eov-button>
+      <eov-button aria-disabled="true" class="ghost success">Success</eov-button>
+      <eov-button aria-disabled="true" class="ghost warning">Warning</eov-button>
+      <eov-button aria-disabled="true" class="ghost error">Error</eov-button>
+      <eov-button aria-disabled="true" class="ghost info">Info</eov-button>
+    </section>
+
+
+    <h2>Dashed Button</h2>
+    <section>
+      <eov-button aria-disabled="true" class="dashed">Default</eov-button>
+      <eov-button aria-disabled="true" class="dashed success">Success</eov-button>
+      <eov-button aria-disabled="true" class="dashed warning">Warning</eov-button>
+      <eov-button aria-disabled="true" class="dashed error">Error</eov-button>
+      <eov-button aria-disabled="true" class="dashed info">Info</eov-button>
+    </section>
+
+    <h2>Text Button</h2>
+    <section>
+      <eov-button aria-disabled="true" class="text">Default</eov-button>
+      <eov-button aria-disabled="true" class="text success">Success</eov-button>
+      <eov-button aria-disabled="true" class="text warning">Warning</eov-button>
+      <eov-button aria-disabled="true" class="text error">Error</eov-button>
+      <eov-button aria-disabled="true" class="text info">Info</eov-button>
+    </section>
+  </section>
 </body>
+
 </html>
 

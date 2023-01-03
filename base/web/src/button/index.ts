@@ -1,24 +1,23 @@
-import EovElement from "../eov"
-EovElement.prefix = 'new'
+import HTMLEovElement from "../eov"
+//EovElement.prefix = 'new'
 
+import './../assets/styles/button.scss'
 import { addTemplateElement as template } from "../utils"
+
 // 实现参考：
 // https://web-components.carbondesignsystem.com/?path=/docs/components-button--default
 // https://www.w3.org/TR/wai-aria-practices/examples/button/button.html
 // https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Roles/button_role
 //
-export default class Button extends EovElement{
-  // 是否给class属性里面的值增加前缀
-  prefixClassName: boolean
+export default class Button extends HTMLEovElement{
 
   constructor(opts: any) {
     super(opts)
-    this.prefixClassName = true
   }
 
   connectedCallback() {
     let shadow = this.attachShadow({mode: 'open'})
-    const htmlString = `
+    const html = `
       <style scoped>
       :host {
         display: inline-block;
@@ -38,7 +37,7 @@ export default class Button extends EovElement{
       </span>
     `
 
-    let tplEl = template(htmlString, {}, shadow)
+    let tplEl = template(html, {}, shadow)
     let content = tplEl.content.cloneNode(true)
     shadow.append(content)
 

@@ -2,8 +2,28 @@ const { merge } = require('webpack-merge');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const common = require('./../../webpack.common.js');
 const webpack = require("webpack");
+const fs = require('fs')
 
-const pages = ['button', 'datepicker']
+
+// directory path
+const dir = './examples/'
+let pages = []
+
+// list all files in the directory
+try {
+  let files = fs.readdirSync(dir)
+
+  files = files.filter(el => el.includes('.html'))
+
+  // files object contains all files names
+  files.forEach(file => {
+    const ary = file.split('.')
+    pages.push(ary[0])
+  })
+} catch (err) {
+  console.log(err)
+}
+
 
 module.exports = merge(common, {
   mode: 'development',
@@ -40,7 +60,7 @@ module.exports = merge(common, {
       inject: true,
       // title: `${page}`,
       // template file
-      template: `./examples/${page}.html`,
+      template: `${dir}${page}.html`,
       // output file
       filename: `${page}.html`,
       chunks: [page],

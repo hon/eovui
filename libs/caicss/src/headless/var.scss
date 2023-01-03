@@ -1,5 +1,5 @@
 @use 'design' as *;
-@use './config' as *;
+@use './../config' as *;
 @use 'sass:map';
 
 // css 变量，为了实现css的扩展

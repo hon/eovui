@@ -1,0 +1,24 @@
+@use './config' as *;
+@use 'sass:map';
+
+$-name-map: () !default;
+/// 通过索引获取*-colors等中的颜色变量
+/// *-colors的变量通常存储在_design.scss中
+/// 
+/// @param {string} $name 颜色系列的名字
+/// @param {number} $idx  索引，获取第几个
+/// @param {boolean} $val 是否获取值
+/// @param {map} $name-map 颜色变量组成的map，为了实现动态变量名。
+/// 该map里的变量在实际使用的时候才能确定
+/// @return 根据$val获取返回值，如果为true则返回对应的值，否则返回变量名
+@function get-color-by-name($name, $idx, $val: false, $name-map: $-name-map) {
+  // 如果$primary-colors没有定义或值为null，就使用默认值null, 下同
+
+  $item: map.get($name-map, $name);
+  @if $val and length($item) > 0 {
+    @return nth(map.get($name-map, $name), $idx);
+  }
+  @return #{$vp}-#{$name}-color-#{$idx};
+}
+
+

@@ -35,6 +35,7 @@
     "webpack-merge": "^5.8.0"
   },
   "dependencies": {
+    "@eovui/caicss": "workspace:^1.0.0",
     "@eovui/utils": "workspace:^1.0.0"
   }
 }
