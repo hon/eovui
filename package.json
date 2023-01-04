@@ -36,6 +36,7 @@
   },
   "dependencies": {
     "@eovui/caicss": "workspace:^1.0.0",
+    "@eovui/core": "workspace:^1.0.0",
     "@eovui/utils": "workspace:^1.0.0"
   }
 }

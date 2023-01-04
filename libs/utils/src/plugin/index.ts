@@ -1,7 +1,7 @@
 import {default as optionsUtil, OptionType} from "./../options";
 
 /**
- * The entity who really register plugins 
+ * The entity that really register plugins 
  */
 export interface PluginRegister {
   plugins: PluginManager

@@ -1,4 +1,4 @@
-import HTMLEovElement from "../eov"
+import HTMLEovElement from "@eovui/core"
 //EovElement.prefix = 'new'
 
 import './../assets/styles/button.scss'
