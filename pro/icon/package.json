@@ -6,8 +6,9 @@
   "types": "./dist/tsc/index.d.ts",
   "scripts": {
     "test": "npm run build && wtr \"tests/**/*.test.(js|html)\" --node-resolve",
-    "dev": "webpack serve --open --config ./../../webpack.dev.js",
-    "build": "webpack --config ./../../webpack.prod.js",
+    "dev": "webpack serve --open --config ./../../scripts/webpack.dev.js",
+    "dev:examples": "webpack serve --open --config ./../../scripts/webpack.dev.examples.js",
+    "build": "webpack --config ./../../scripts/webpack.prod.js",
     "watch": "webpack --watch",
     "doc": "tsc && jsdoc -c ./../../jsdoc.config.json && sfz ./docs"
   },

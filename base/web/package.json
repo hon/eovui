@@ -6,7 +6,8 @@
   "types": "./dist/tsc/index.d.ts",
   "scripts": {
     "test": "jest --watch --config=./../../jest.config.js",
-    "dev": "webpack serve --config ./webpack.dev.js"
+    "dev": "webpack serve --config ./../../scripts/webpack.dev.js",
+    "dev:examples": "webpack serve --config ./../../scripts/webpack.dev.examples.js"
   },
   "keywords": [],
   "author": "",

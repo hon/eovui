@@ -4,9 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "webpack serve --config ./../../webpack.dev.js",
-    "dev-open": "webpack serve --open --config ./../../webpack.dev.js",
-    "build": "webpack --config ./../../webpack.prod.js",
+    "dev": "webpack serve --config ./../../scripts/webpack.dev.js",
+    "dev:open": "webpack serve --open --config ./../../scripts/webpack.dev.js",
+    "build": "webpack --config ./../../scripts/webpack.prod.js",
     "watch": "webpack --watch",
     "doc": "tsc && jsdoc -c ./../../jsdoc.config.json && sfz ./docs"
   },
