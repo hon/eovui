@@ -1,8 +1,9 @@
-# Eovui
-"Eov" is short of "element of visual". Eovui is a ui library made with follow philosophies and heart.
+# eovui
+"eov" is short of "element of visual". eovui is a web-component ui library.
 
-# Philosophy
-- Usable, well tested.
-- Efficient, algorithm and wasm.
-- Extensible, easy to add extra functionality and integrate.
+# Philosophies
+- Usable. Well tested.
+- Efficient. Algorithm and wasm.
+- Extensible. Easy to add extra functionalities and integrates.
+- Simple. Build with web component, only a very thin runtime. 
 
