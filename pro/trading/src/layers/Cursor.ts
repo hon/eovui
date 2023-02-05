@@ -1,5 +1,5 @@
 import { Layer } from './index'
-import Chart from '../Chart'
+import Chart from '../chart'
 import { optionsUtil, OptionType } from '@eovui/utils'
 
 // 游标

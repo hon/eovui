@@ -1,10 +1,10 @@
 import "./assets/style/index.scss"
-import DataItem from './data/DataItem'
+import DataItem from './data/data-item'
 import Chart from './Chart'
-import MainChart from './layers/MainChart'
-import MaChart from './layers/MaChart'
+import MainChart from './layers/main-chart'
+import MaChart from './layers/ma-chart'
 import Cursor from './layers/cursor'
-import DataSerise from './data/DataSerise'
+import DataSerise from './data/data-serise'
 
 function $(id: string) {
   return document.getElementById(id)

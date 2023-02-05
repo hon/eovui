@@ -1,4 +1,4 @@
-import DataItem, { IDataItem } from "./DataItem"
+import DataItem, { IDataItem } from "./data-item"
 import { optionsUtil, OptionType } from '@eovui/utils'
 
 type IndexRange = [number, number | undefined]

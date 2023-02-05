@@ -1,6 +1,6 @@
 import { Layer } from './index'
-import MainChart from './MainChart'
-import Chart from '../Chart'
+import MainChart from './main-chart'
+import Chart from '../chart'
 import { optionsUtil, OptionType } from '@eovui/utils'
 
 /**
@@ -55,7 +55,6 @@ export default class MaChart extends Layer{
 
       return maData
     })
-
   }
 
 

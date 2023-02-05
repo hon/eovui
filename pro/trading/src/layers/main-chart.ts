@@ -1,6 +1,6 @@
-import CandleStick from '../render/CandleStick'
+import CandleStick from '../render/candlestick'
 import { Layer } from './index'
-import Chart from '../Chart'
+import Chart from '../chart'
 import { optionsUtil, OptionType } from '@eovui/utils'
 
 

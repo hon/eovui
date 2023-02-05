@@ -1,9 +1,9 @@
 /**
  * 操作ViewOnData
  */
-import Coordinate from "./Coordinate";
-import ViewOnData from "../data/ViewOnData";
-import Chart from "../Chart";
+import Coordinate from "./coordinate";
+import ViewOnData from "../data/view-on-data";
+import Chart from "../chart";
 import { optionsUtil, OptionType } from '@eovui/utils'
 
 export default class Interaction {
@@ -12,6 +12,7 @@ export default class Interaction {
   coordinate: Coordinate
   viewOnData: ViewOnData
   chart: Chart
+
   // Events
   // triggered just after start to zoom in
   // on('zoom-in-start')

@@ -1,6 +1,6 @@
 import Layers, {Layer} from './layers'
-import Interaction from './render/Interaction'
-import DataSerise from './data/DataSerise'
+import Interaction from './render/interaction'
+import DataSerise from './data/data-serise'
 import { Evt, optionsUtil, OptionType } from '@eovui/utils'
 
 
