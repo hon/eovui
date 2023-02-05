@@ -25,11 +25,10 @@ export default class Icon extends HTMLEovElement{
         cursor: not-allowed;
       }
       </style>
-      <span class="component-container">
-        <button id="proxy-button" tabindex="-1" style="display:none;"></button>
+      <i class="component-container">
         <slot part="default"></slot>
         <slot part="icon" name="icon"></slot>
-      </span>
+      </i>
     `
 
     let tplEl = template(html, {}, shadow)

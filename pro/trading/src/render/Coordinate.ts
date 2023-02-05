@@ -2,9 +2,7 @@ import { optionsUtil, OptionType } from '@eovui/utils'
 
 /**
  * 坐标系统
- * 主要功能是:
- * 1. 数量坐标转化成像素坐标
- * 2. 像素坐标转化成数量坐标。 
+ * 主要功能: 像素坐标和渲染单位坐标的互相转化
  * 注意：像素坐标通常是从界面中直接获得。因此是逻辑像素而非canvas环境里使用的，绘图像素。
  * 很多图表都需要根据数据来映射界面里的像素值，或者根据像素值映射出数据，因此将坐标系统
  * 分离出来。
@@ -23,6 +21,7 @@ export default class Coordinate {
         bottom: 0,
         left: 0,
       },
+
       // 数据信息
       data: {
         // 可见区域内的最高价
@@ -81,6 +80,21 @@ export default class Coordinate {
     return this.opts.high - distance
   }
    */
+
+  /**
+   * 根据数据索引计算像素点x的值
+   * @param {number} dataIndex - 数据索引
+   * @return 计算出来的水平值是一个范围
+   */
+  calcX(dataIndex: number): Array<number> {
+    return []
+  }
+  /**
+   * 根据数值（通常是价格）计算像素点y的值
+   */
+  calcY(value: number): number {
+    return 0
+  }
 
   /**
    * 根据某个（像素）点x的位置，计算数值的索引

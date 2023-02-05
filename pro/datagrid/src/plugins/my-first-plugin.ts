@@ -11,6 +11,6 @@ export default class MyFirstPlugin extends Plugin {
 
   sayHello() {
     console.log(`Hi, this is my first plugin.`)
-    console.log(this.datagrid)
+    console.log(this.core)
   }
 }

@@ -3,7 +3,7 @@ import DataItem from './data/DataItem'
 import Chart from './Chart'
 import MainChart from './layers/MainChart'
 import MaChart from './layers/MaChart'
-import Cursor from './layers/Cursor'
+import Cursor from './layers/cursor'
 import DataSerise from './data/DataSerise'
 
 function $(id: string) {
@@ -59,9 +59,11 @@ function run(symbol: string, size: number, period = 'day') {
         */
       })
 
+      // 定义蜡烛图图层
       const kl = new MainChart({
         chart, 
       })
+      
 
       prevEl.addEventListener('click', async evt => {
         //await dataSerise.prependData(40)
@@ -81,41 +83,49 @@ function run(symbol: string, size: number, period = 'day') {
         chart.interaction.reset()
       })
 
+      // 定义Ma(5)图层
       const ma5 = new MaChart({
-        mainChart: kl,
+        chart,
         period: 5,
         lineColor: '#ff9933',
         lineWidth: 1,
       })
 
+      // 定义Ma(20)图层
       const ma20 = new MaChart({
-        mainChart: kl,
+        chart,
         period: 20,
         lineColor: '#cc3399',
         lineWidth: 2,
       })
 
+      // 定义Ma(30)图层
       const ma30 = new MaChart({
-        mainChart: kl,
+        chart,
         period: 30,
         lineColor: '#cc3300',
         lineWidth: 2,
       })
-      .hide()
+        .hide()
+
+      // 定义游标图层
       const cursor = new Cursor({
         chart,
       })
 
-      chart
-        .deleteAllLayers()
-        .addLayers(
-          kl,
-          ma5, 
-          ma20, 
-          ma30, 
-          cursor,
-        )
-        .update()
+      // 清理图层
+      chart.layers.clearLayers()
+      // 添加图层
+      chart.layers.addLayers([
+        kl,
+        ma5, 
+        ma20, 
+        ma30, 
+        cursor,
+      ])
+
+      // 重绘整个图表
+      chart.update()
 
       console.log(dataSerise)
     

@@ -1,7 +1,6 @@
 import { optionsUtil, OptionType } from '@eovui/utils'
 type IndexRange = [number, number | undefined]
 
-
 /**
  * 对图表的放大，缩小，往前，往后，刷新的操作，本质上是对数据进行的相关操作。
  * 操作完成后，再根据数据进行渲染。

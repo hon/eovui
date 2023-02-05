@@ -62,7 +62,6 @@ export default class Chart {
         width: 16,
         gap: 2,
       },
-
     }
 
     this.options = optionsUtil.setOptions(defaultOptions, options)
@@ -154,30 +153,6 @@ export default class Chart {
     canvas.style.height = styleHeight + 'px';
     ctx.scale(dpr, dpr);
     return {canvas, ctx, width, height, styleWidth, styleHeight}
-  }
-
-  /**
-   * Add single layer
-   * @param {Layer} layer - 图层实例
-   */
-  addLayer(layer: Layer) {
-    this.layers.addLayer(layer)
-    return this
-  }
-
-  /**
-   * Add one or more layers 
-   */
-  addLayers(...args: Layer[]) {
-    [...arguments].forEach(layer => {
-      this.addLayer(layer)
-    }, this)
-    return this
-  }
-
-  deleteAllLayers() {
-    this.layers.deleteAllLayers()
-    return this
   }
   
   /**

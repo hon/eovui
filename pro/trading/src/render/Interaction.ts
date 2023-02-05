@@ -1,3 +1,6 @@
+/**
+ * 操作ViewOnData
+ */
 import Coordinate from "./Coordinate";
 import ViewOnData from "../data/ViewOnData";
 import Chart from "../Chart";
@@ -98,10 +101,12 @@ export default class Interaction {
         high: priceRange[0],
         low: priceRange[1],
       })
+
+      // 像素坐标(x)转换成数据索引
       const dataIndex = coord.calcDataIndex(evt.mouseX)
-      //const price = self.calcDataValue(evt.mouseY)
       //console.log(dataIndex, dataSerise.segmentData.dataItems[dataIndex])
 
+      // 像素坐标(y)转换成价格
       const price = coord.calcDataValue(evt.mouseY)
       //console.log(price)
 
@@ -173,7 +178,6 @@ export default class Interaction {
       }
     })
     return this
-
   }
 
   zoomIn() {

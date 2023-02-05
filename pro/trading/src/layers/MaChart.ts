@@ -1,5 +1,6 @@
 import { Layer } from './index'
 import MainChart from './MainChart'
+import Chart from '../Chart'
 import { optionsUtil, OptionType } from '@eovui/utils'
 
 /**
@@ -8,6 +9,7 @@ import { optionsUtil, OptionType } from '@eovui/utils'
 export default class MaChart extends Layer{
   options: OptionType
   mainChart: MainChart
+  chart: Chart
   period: number
   algoName: string
   constructor(options: OptionType) {
@@ -18,7 +20,8 @@ export default class MaChart extends Layer{
       period: 5, 
     }
     this.options = optionsUtil.setOptions(defaultOptions, options)
-    this.mainChart = this.options.mainChart
+
+    this.chart = this.options.chart
 
     this.period = this.options.period
     this.algoName = `ma${this.period}`
@@ -32,7 +35,7 @@ export default class MaChart extends Layer{
   // 移动平均线算法
   algo() {
     const self = this
-    const ds = this.mainChart.chart.dataSerise
+    const ds = this.chart.dataSerise
     ds.addAlgo(self.algoName, (d: any) => {
       
       let maData = []
@@ -59,26 +62,26 @@ export default class MaChart extends Layer{
   // todo 可以将这里的绘图逻辑放到MainChart的绘图逻辑里。
   draw() {
     const self = this
-    const dataSerise = this.mainChart.chart.dataSerise
+    const dataSerise = this.chart.dataSerise
     const highestLowestPrice = dataSerise.highestLowestPrice()
 
     // body的顶部，距离表上方的距离
-    const bodyWidth = self.mainChart.chart.options.renderUnit.width
+    const bodyWidth = self.chart.options.renderUnit.width
 
     // 每个蜡烛图之间的间距
-    let gap = self.mainChart.chart.options.renderUnit.gap
-    const ctx = self.mainChart.chart.ctx
+    let gap = self.chart.options.renderUnit.gap
+    const ctx = self.chart.ctx
     const dpr = window.devicePixelRatio
 
     const maData = dataSerise.segmentData[`ma${self.period}`]
-    const coord = self.mainChart.chart.interaction.coordinate
+    const coord = self.chart.interaction.coordinate
 
     //ctx.save()
     ctx.beginPath()
     maData.forEach((item: any, idx: any) => {
       if (idx >= self.period - 1) {
         const x = idx * (bodyWidth + gap) / dpr + bodyWidth / 4
-        let y = self.mainChart.chart.options.paddingTop / dpr
+        let y = self.chart.options.paddingTop / dpr
         y += coord.calcHeight((highestLowestPrice[0] - item)) / dpr
         if (idx == self.period -1) {
           ctx.moveTo(x, y)
@@ -94,7 +97,5 @@ export default class MaChart extends Layer{
     //ctx.restore()
   }
 }
-
-
 
 

@@ -32,5 +32,7 @@ export default class DataGrid {
 const dg = new DataGrid({})
 
 // register `my-first-plugin`
-dg.registerPlugin(new MyFirstPlugin('my-first-plugin'), {})
+dg.registerPlugin(new MyFirstPlugin('my-first-plugin'), {
+  core: dg,
+})
 dg.mount(document.body)
