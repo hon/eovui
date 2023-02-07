@@ -97,4 +97,3 @@ export default class MaChart extends Layer{
   }
 }
 
-

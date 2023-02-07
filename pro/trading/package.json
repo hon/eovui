@@ -1,7 +1,7 @@
 {
   "name": "@eovui/trading",
   "version": "1.0.0",
-  "description": "",
+  "description": "Headless trading chart.",
   "main": "./dist/index.js",
   "types": "./dist/tsc/index.d.ts",
   "scripts": {

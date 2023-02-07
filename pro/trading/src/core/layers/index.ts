@@ -27,10 +27,10 @@ export class Layer {
   // 比如在Render Loop中，会重复绘制所有的图层。而如果某个图层是静态的，数据或显示一直不变，就可以
   // 将该图层的isRedraw设置为false, 这样每次重绘的时候就不会绘制该图层了
   // isVisible如果为false也不会绘制，但图层不可见了
-  isRedraw: boolean = true
+  // isRedraw: boolean = true
 
-  // 是否为根据数据绘制的图层。
-  isDataLayer: boolean = true
+
+  data: unknown
 
   /**
    * 添加可绘制对象
@@ -47,6 +47,11 @@ export class Layer {
     this.isVisible = true
     return this
 
+  }
+
+  // 是否为根据数据绘制的图层。
+  isDataLayer(): boolean {
+    return this.data != undefined
   }
 
 
@@ -128,7 +133,7 @@ export default class Layers {
       // 过滤掉隐藏图层
       .filter(el => el.isVisible == true)
       // 过滤掉不需要重绘的图层
-      .filter(el => el.isRedraw == true)
+      // .filter(el => el.isRedraw == true)
       .forEach((layer, idx) => {
         // 如果有数据算法，就先运行
         (typeof layer.algo == 'function') && layer.algo()

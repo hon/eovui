@@ -5,14 +5,11 @@ import { Evt, optionsUtil, OptionType } from '@eovui/utils'
 
 
 /**
- * 主图,
  * 主要功能
  * 1. 图层管理的相关api
  * 2. 图表设置的api
  * 3. 事件处理
  * 4. 整体的配置，比如缩放方式, 在chart里进行配置，但是具体的缩放计算由各自的层自己控制
- * Chart里为什么没有数据？
- * 因为数据是由具体的图层决定的
  */
 export default class Chart {
   options: OptionType

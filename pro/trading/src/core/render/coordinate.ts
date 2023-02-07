@@ -1,11 +1,10 @@
 import { optionsUtil, OptionType } from '@eovui/utils'
 
 /**
- * 坐标系统
+ * 坐标系统: 很多图表都需要根据数据来映射界面里的像素值，或者根据像素值映射出数据，因此将坐标系统
+ * 分离出来。
  * 主要功能: 像素坐标和渲染单位坐标的互相转化
  * 注意：像素坐标通常是从界面中直接获得。因此是逻辑像素而非canvas环境里使用的，绘图像素。
- * 很多图表都需要根据数据来映射界面里的像素值，或者根据像素值映射出数据，因此将坐标系统
- * 分离出来。
  */
 
 export default class Coordinate {
@@ -139,6 +138,5 @@ export default class Coordinate {
     this.options.data = data
     return this
   }
-
 }
 
