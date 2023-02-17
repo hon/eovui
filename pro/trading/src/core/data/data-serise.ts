@@ -1,20 +1,35 @@
+/**
+ * 处理源数据，使其可以用来绘图
+ */
 import DataItem, { IDataItem } from "./data-item"
 import { optionsUtil, OptionType } from '@eovui/utils'
 
 type IndexRange = [number, number | undefined]
 
+export default class DataSerise {
+  data: any
+  adapters: Array<{name: string, fn: Function}>
+  constructor(data: OptionType) {}
+  addAdapter(name: string, fn: Function) {
+    const adapter = {name, fn}
+    this.adapters.push(adapter)
+  }
+}
+
 /**
  * 连续数据 
  */
-export default class DataSerise{
+export /*default*/ class DataSerise1{
   data: OptionType
   segmentData: any
   segmentRange: any
   algos: any
   highLowRange: [number, number]
   allHighLowRange: [number, number]
+  adapters: Array<{name: string, fn: Function}>
   
   constructor(data: OptionType) {
+    this.adapters = []
     this.data = data
     this.segmentData = {}
     // 数据段的范围, 图表里显示的数据
@@ -25,6 +40,7 @@ export default class DataSerise{
       // 显示多少条数据
       this.data.dataItems.length
     ]
+
     this.algos = {}
 
     // dataItems里的最高价和最低价范围
@@ -50,6 +66,12 @@ export default class DataSerise{
     }
     this.segmentRange = range
     this.segment()
+  }
+
+
+  addAdapter(name: string, fn: Function) {
+    const adapter = {name, fn}
+    this.adapters.push(adapter)
   }
 
   /**
@@ -162,8 +184,7 @@ export default class DataSerise{
     for (let [k, v] of Object.entries(this.algos)) {
       this.runAlgo(k, true)
     }
-    // 
-    this.segment()
+    //this.segment()
 
     return this
   }

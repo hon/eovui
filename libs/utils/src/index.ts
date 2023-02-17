@@ -8,6 +8,11 @@ export {
 
 export {default as optionsUtil, OptionType} from './options'
 
+// 任意对象类型
+export interface AnyObject {
+  [key: string]: any
+}
+
 /**
  * 将html string转化为template
  * 通过这个函数就可以将外部的html文件解析成template

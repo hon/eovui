@@ -1,3 +1,6 @@
+/**
+ * 股票数据项
+ */
 export interface IDataItem {
   high: number
   open: number
@@ -5,9 +8,7 @@ export interface IDataItem {
   low: number
   time: string
 }
-/**
- * 股票数据项
- */
+
 export default class DataItem {
   high: number
   open: number

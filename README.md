@@ -7,3 +7,9 @@
 - Extensible. Easy to add extra functionalities and integrates.
 - Simple. Build with web component, only a very thin runtime. 
 
+# Run
+```bash
+# pnpm --filter <package_selector> <command>
+pnpm -F="@eovui/trading" dev
+```
+

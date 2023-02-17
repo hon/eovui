@@ -27,13 +27,17 @@ export default class MainChart extends Layer {
   constructor(options: OptionType) {
     super()
 
-    this.chart = options.chart
 
     const defaultOptions = {
       mainChartType: 'candlestick',
     }
+
     this.options = optionsUtil.setOptions(defaultOptions, options)
     this.mousePosition = {x: 0, y: 0}
+
+    this.chart = options.chart
+    this.id = options.id
+    this.name = options.name
 
     // https://dribbble.com/shots/16257089-SwiftUI-Trading-market-app-charts
     //const mainChartTypes = ['candlestick', 'ohlc', 'line']
@@ -45,6 +49,10 @@ export default class MainChart extends Layer {
     return this
   }
 
+  // 仅将serise放到layer data中, 不做任何处理
+  dataAlgo(data: any) {
+    return data
+  }
 
 
   /**
@@ -53,12 +61,12 @@ export default class MainChart extends Layer {
   draw() {
     const self = this
     const dpr = window.devicePixelRatio
-    const coord = this.chart.interaction.coordinate
+    const coord = this.chart.coordinate
     const ctx = self.chart.ctx
-    const dataSerise = this.chart.dataSerise
+    const layerData = this.chart.layers.layerData
 
     // 重新设置可是区域的最高价和最低价
-    const highestLowestPrice = dataSerise.highestLowestPrice()
+    const highestLowestPrice = layerData.highestLowestPrice()
     coord.updateData({
       high: highestLowestPrice[0],
       low: highestLowestPrice[1],
@@ -69,7 +77,7 @@ export default class MainChart extends Layer {
     // 每个蜡烛图之间的间距
     let gap = this.chart.options.renderUnit.gap
 
-    dataSerise.segmentData.dataItems.forEach((dataItem: any, idx: number) => {
+    layerData.data.segment[this.id].forEach((dataItem: any, idx: number) => {
       // 绘制主图
       const drawKline = () => {
         const bodyOffset = idx * (bodyWidth + gap)

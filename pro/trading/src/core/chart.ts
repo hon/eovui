@@ -1,7 +1,8 @@
-import Layers, {Layer} from './layers'
-import Interaction from './render/interaction'
-import DataSerise from './data/data-serise'
+import Layers from './layers'
+import Interaction from './interaction'
 import { Evt, optionsUtil, OptionType } from '@eovui/utils'
+import Coordinate from "./render/coordinate";
+import DataView from "./data/data-view";
 
 
 /**
@@ -27,12 +28,28 @@ export default class Chart {
 
   // Height of canvas on screen
   styleHeight: number
+
   layers: Layers
+
+  // 标的id, 用于获取标的数据
+  stockId: string
+
+  // 
+  serise: any 
+
+  coordinate: Coordinate
+
+  dataView: DataView
+
+
+  // 主图层的id, 用来确定data serise
+  mainLayerId: string
   canvasPosition: any
-  mouseDown: boolean
   interaction: Interaction
-  dataSerise: DataSerise
   easyEvent: Evt
+
+  // 是否可交互 
+  // isInteractable: boolean
 
   /**
    * @param {OptionType} options - 配置选项 
@@ -42,7 +59,7 @@ export default class Chart {
    * 属性是对象本身固有的。配置项是外部传入的。
    */
   constructor(options: OptionType) {
-    this.dataSerise = options.dataSerise
+    this.serise = options.serise
 
     // 默认数据项，当对象初始化时，传入的数据项如果没有设置相关的项，会使用默认配置项。
     const defaultOptions: OptionType = {
@@ -76,11 +93,13 @@ export default class Chart {
     this.height = height
     this.styleWidth = styleWidth
     this.styleHeight = styleHeight
-    this.layers = new Layers()
+
+
+    this.layers = new Layers(this.serise)
+
 
     //this.mouseMoveEvent()
     this.canvasPosition = this.canvas.getBoundingClientRect()
-    this.mouseDown = false
 
     // 创建自定义事件，所有的事件都绑定到this.canvas元素上
     this.easyEvent = new Evt({
@@ -92,6 +111,7 @@ export default class Chart {
       self.canvasPosition = self.canvas.getBoundingClientRect()
     })
 
+    /*
     this.canvas.addEventListener('mousedown', (evt: any) => {
       self.mouseDown = true
     })
@@ -99,36 +119,78 @@ export default class Chart {
     this.canvas.addEventListener('mouseup', (evt: any) => {
       self.mouseDown = false
     })
+    */
 
-    // 初始化Interaction
-    this.interaction = new Interaction({
-      chart: this,
+
+    const layerData = this.layers.layerData
+    // 最高价和最低价
+    const priceRange = layerData.highestLowestPrice()
+
+    this.initDataView()
+
+    // 初始化坐标系统
+    const coord = new Coordinate({
+      // 视觉信息
+      width: this.width,
+      height: this.height,
+      padding: {
+        top: this.options.paddingTop,
+        right: 0,
+        bottom: this.options.paddingBottom,
+        left: 0,
+      },
+
+      // 数据信息
+      data: {
+        high: priceRange[0],
+        low: priceRange[1],
+      },
+
+      // 水平偏移
+      offset: {
+        // 每项的宽度
+        width: this.options.renderUnit.width,
+        
+        // 每项的间隔
+        gap: this.options.renderUnit.gap,
+      }
     })
 
+    this.coordinate = coord
+
   }
+
 
   setOptions(target: OptionType, source: OptionType) {
     this.options = optionsUtil.setOptions(target, source)
     return this
   }
 
-  mouseMoveEvent(cb: Function) {
-    const self = this
-    
-    this.canvas.addEventListener('mousemove', (evt: any) => {
-      const mouseX = evt.x - this.canvasPosition.x
-      const mouseY = evt.y - this.canvasPosition.y
-      evt.mouseX = mouseX
-      evt.mouseY = mouseY
-      evt.mouseDown = self.mouseDown
 
-      cb && cb(evt)
-    }, false)
+  /**
+   * 设置图表是否可交互
+   * @param {boolean} flag - 设置flag为true或false来控制是否可交互
+   */
+  interactable(flag: boolean) {
+    if (flag === true) {
+      // 初始化Interaction
+      this.interaction = new Interaction({
+        chart: this,
+      })
+    } else {
+      this.interaction = undefined
+    }
+    return this
+  }
+
+  isInteractable(): boolean {
+    console.log(this.interaction)
+    return this.interaction !== undefined
   }
 
 
   /**
-   * 初始化canvas
+   * 初始化canvas元素
    * @param {HTMLCanvasElement} canvas - canvas 元素
    * @return {Object}
    */
@@ -151,13 +213,26 @@ export default class Chart {
     ctx.scale(dpr, dpr);
     return {canvas, ctx, width, height, styleWidth, styleHeight}
   }
+
+  // 初始化数据视图
+  initDataView() {
+    const viewWidth = Math.floor(this.width / (this.options.renderUnit.width + this.options.renderUnit.gap))
+    this.dataView = new DataView({
+      totalDataLength: this.layers.layerData.data.length,
+      defaultViewWidth: viewWidth,
+    })
+    this.layers.layerData.setSegmentRange(this.dataView.indexRange)
+    return this
+  }
+
   
   /**
-   * Update the canvas
+   * Redraw the canvas
    */
-  update() {
+  draw(command?: OptionType) {
     this.ctx.clearRect(0, 0, this.width, this.width)
-    this.layers.draw()
+    this.layers.draw(command)
+    //console.log(this.layers)
     return this
   }
 }

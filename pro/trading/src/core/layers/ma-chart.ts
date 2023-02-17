@@ -1,5 +1,4 @@
 import { Layer } from './index'
-import MainChart from './main-chart'
 import Chart from '../chart'
 import { optionsUtil, OptionType } from '@eovui/utils'
 
@@ -8,7 +7,6 @@ import { optionsUtil, OptionType } from '@eovui/utils'
  */
 export default class MaChart extends Layer{
   options: OptionType
-  mainChart: MainChart
   chart: Chart
   period: number
   algoName: string
@@ -25,6 +23,8 @@ export default class MaChart extends Layer{
 
     this.period = this.options.period
     this.algoName = `ma${this.period}`
+    this.id = this.options.id
+    this.name = this.options.name
   }
 
   setOptions(newOptions: OptionType) {
@@ -32,37 +32,31 @@ export default class MaChart extends Layer{
     return this
   }
 
+
   // 移动平均线算法
-  algo() {
-    const self = this
-    const ds = this.chart.dataSerise
-    ds.addAlgo(self.algoName, (d: any) => {
-      
-      let maData = []
-      const n = self.period
-      const dataItems = ds.data.dataItems
-      const dataLen = dataItems.length
+  dataAlgo(data: any) {
+    let maData = []
+    const n = this.period
+    const dataLen = data.length
 
-      for (let i = 0; i < dataLen; i++) {
-        const copyData = dataItems.slice(dataLen - (n + i), dataLen - i)
-        if (copyData.length == n) {
-          const average = copyData.reduce((pre: any, cur: any) => pre + cur.close, 0) / n
-          maData.unshift(average)
-        } else {
-          maData.unshift(undefined)
-        }
+    for (let i = 0; i < dataLen; i++) {
+      const copyData = data.slice(dataLen - (n + i), dataLen - i)
+      if (copyData.length == n) {
+        const average = copyData.reduce((pre: any, cur: any) => pre + cur.close, 0) / n
+        maData.unshift(average)
+      } else {
+        maData.unshift(undefined)
       }
-
-      return maData
-    })
+    }
+    return maData
   }
 
 
   // todo 可以将这里的绘图逻辑放到MainChart的绘图逻辑里。
   draw() {
     const self = this
-    const dataSerise = this.chart.dataSerise
-    const highestLowestPrice = dataSerise.highestLowestPrice()
+    const layerData = this.chart.layers.layerData
+    const highestLowestPrice = layerData.highestLowestPrice()
 
     // body的顶部，距离表上方的距离
     const bodyWidth = self.chart.options.renderUnit.width
@@ -72,8 +66,8 @@ export default class MaChart extends Layer{
     const ctx = self.chart.ctx
     const dpr = window.devicePixelRatio
 
-    const maData = dataSerise.segmentData[`ma${self.period}`]
-    const coord = self.chart.interaction.coordinate
+    const maData = layerData.data.segment[this.id]
+    const coord = self.chart.coordinate
 
     //ctx.save()
     ctx.beginPath()

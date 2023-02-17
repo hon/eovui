@@ -6,24 +6,29 @@ import { optionsUtil, OptionType } from '@eovui/utils'
 export default class Cursor extends Layer {
   options: OptionType
   chart: Chart
+  mouseX: number
+  mouseY: number
   constructor(options: OptionType) {
     super()
     const defaultOptions = {
       cursor: 'crosshair'
-      
     }
     this.options = optionsUtil.setOptions(defaultOptions, options)
-
     this.chart = this.options.chart
 
-    this.chart.canvas.style.cursor = this.options.cursor
+    if (this.chart.isInteractable()) {
 
-    const self = this
-    this.chart.mouseMoveEvent((evt: any) => {
-      self.chart.update()
-      this.drawLines(evt.mouseX, evt.mouseY)
-    })
+      this.id = this.options.id
+      this.name = this.options.name
 
+      this.chart.canvas.style.cursor = this.options.cursor
+
+      const self = this
+      this.chart.interaction.mouseMoveEvent((evt: any) => {
+        self.mouseX = evt.mouseX
+        self.mouseY = evt.mouseY
+      })
+    }
   }
 
   setOptions(newOptions: OptionType) {
@@ -31,23 +36,19 @@ export default class Cursor extends Layer {
     return this
   }
 
-  drawLines(x: number, y: number) {
+  draw() {
     const ctx = this.chart.ctx
     // ctx.save()
     ctx.fillStyle = '#ffffff'
 
     // 横线
-    ctx.fillRect(0, y, this.chart.width, 0.5)
+    ctx.fillRect(0, this.mouseY, this.chart.width, 0.5)
 
     // 纵线
-    ctx.fillRect(x, 0, 0.5, this.chart.height)
+    ctx.fillRect(this.mouseX, 0, 0.5, this.chart.height)
 
     // ctx.restore()
 
   }
 
-  draw() {
-    //this.chart.update()
-
-  }
 }

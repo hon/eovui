@@ -1,9 +1,15 @@
+import DataSerise from "../data/data-serise"
+import { LayerData } from "../data"
+import {OptionType} from "@eovui/utils"
+
 /**
  * 绘制图层, 一个图层一个绘制对象（类似ai）
  * 每个图层有时会绑定一些数据，用于绘图
  */
 export class Layer {
-  constructor() {}
+  constructor() {
+
+  }
 
   // 图层的唯一标识，用于获取图层
   id: string
@@ -30,7 +36,9 @@ export class Layer {
   // isRedraw: boolean = true
 
 
-  data: unknown
+  // 是否为根据数据绘制的图层。
+  isDataLayer: boolean
+
 
   /**
    * 添加可绘制对象
@@ -46,13 +54,8 @@ export class Layer {
   show() {
     this.isVisible = true
     return this
-
   }
 
-  // 是否为根据数据绘制的图层。
-  isDataLayer(): boolean {
-    return this.data != undefined
-  }
 
 
   // 隐藏图层
@@ -60,14 +63,18 @@ export class Layer {
     this.isVisible = false
     return this
   }
-  algo() {}
+
+
+  /**
+   * 添加数据算法
+   * @param {Object} data - 被处理的数据
+   */
+  dataAlgo(data: any) {}
 
   /**
    * 往图层上绘制图形
    */
-  draw() {
-    // to beoverride
-  }
+  draw(options?: OptionType) {}
   
 }
 /**
@@ -75,8 +82,13 @@ export class Layer {
  */
 export default class Layers {
   layers: Layer[]
-  constructor() {
+  layerData: LayerData
+  serise: any 
+  constructor(serise: any) {
     this.layers = []
+    this.layerData = new LayerData
+    this.layerData.mainLayerId = 'main'
+    this.serise = serise
   }
 
   /**
@@ -85,6 +97,12 @@ export default class Layers {
    */
   addLayer(layer: Layer) {
     this.layers.push(layer)
+
+    // 添加图层算法
+    this.layerData.addAlgo(layer.id, layer.dataAlgo.bind(layer, this.serise))
+
+    // 添加图层数据
+    //layer.dataAlgo()
     return this
   }
 
@@ -122,23 +140,33 @@ export default class Layers {
   }
 
 
+
   insertLayer() {}
 
   gotoTop() {}
   gotoBottom() {}
 
-  // 按序绘制图层
-  draw() {
+  /**
+   * 按序绘制图层
+   * @param {OptionType} command - 绘制所有图层是个很费时的操作，可以通过command控制略过一些计算
+   */
+  draw(command?: OptionType) {
+    const self = this
     this.layers
       // 过滤掉隐藏图层
       .filter(el => el.isVisible == true)
       // 过滤掉不需要重绘的图层
       // .filter(el => el.isRedraw == true)
       .forEach((layer, idx) => {
-        // 如果有数据算法，就先运行
-        (typeof layer.algo == 'function') && layer.algo()
 
-        // 绘图
+        // 省略图层数据计算
+        if (command && !command.ignoreAlgo) {
+          console.log('ignoreAlgo')
+          // 让layerData计算数据
+          self.layerData.runAlgo(layer.id)
+        }
+
+        // 根据数据绘图图层
         layer.draw()
       })
   }
