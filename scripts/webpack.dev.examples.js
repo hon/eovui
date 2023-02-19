@@ -8,18 +8,15 @@ const fs = require('fs')
 // directory path
 const dir = './examples/'
 let pages = []
+let folders = []
 
 // list all files in the directory
 try {
   let files = fs.readdirSync(dir)
 
-  files = files.filter(el => el.includes('.html'))
 
-  // files object contains all files names
-  files.forEach(file => {
-    const ary = file.split('.')
-    pages.push(ary[0])
-  })
+  folders = files.filter(el => !el.includes('.'))
+
 } catch (err) {
   console.log(err)
 }
@@ -30,8 +27,8 @@ module.exports = merge(common, {
   experiments: {
     outputModule: false,
   },
-  entry: pages.reduce((config, page) => {
-    config[page] = `./examples/${page}.ts`
+  entry: folders.reduce((config, folder) => {
+    config[folder] = `./examples/${folder}/index.ts`
     return config
   }, {}),
   devtool: 'inline-source-map',
@@ -55,15 +52,16 @@ module.exports = merge(common, {
       __DEV__: JSON.stringify(true),
     }),
 
-  ].concat(pages.map(page => {
+  ].concat(folders.map(folder => {
     return new HtmlWebpackPlugin({
       inject: true,
       // title: `${page}`,
       // template file
-      template: `${dir}${page}.html`,
+      template: `${dir}${folder}/index.html`,
       // output file
-      filename: `${page}.html`,
-      chunks: [page],
+      // http://localhost:8080/examples/button.html
+      filename: `examples/${folder}.html`,
+      chunks: [folder],
     })
 
   }))

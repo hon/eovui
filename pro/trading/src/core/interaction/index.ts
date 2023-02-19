@@ -156,6 +156,7 @@ export default class Interaction {
     //chart.dataSerise.setSegmentRange(range)
     chart.layers.layerData.setSegmentRange(this.chart.dataView.indexRange)
 
+
     // 更新画面
     chart.draw()
     this.chart.easyEvent.emit('move-end', {
@@ -241,5 +242,7 @@ export default class Interaction {
   
   // 当交互被禁止的时候进行一些设置
   disabled() {}
+
+
 
 }

@@ -128,8 +128,10 @@ export default class Chart {
 
     this.initDataView()
 
-    // 初始化坐标系统
-    const coord = new Coordinate({
+    // 初始化主图的坐标系统
+    // 如果在主图里面添加其他股票数据的图层，得在那个图层里面再实例化Coordinate
+    // 然后根据具体的数据计算那个图层需要使用的坐标系统
+    const mainCoord = new Coordinate({
       // 视觉信息
       width: this.width,
       height: this.height,
@@ -156,7 +158,8 @@ export default class Chart {
       }
     })
 
-    this.coordinate = coord
+    this.coordinate = mainCoord
+
 
   }
 
@@ -230,6 +233,7 @@ export default class Chart {
    * Redraw the canvas
    */
   draw(command?: OptionType) {
+    const self = this
     this.ctx.clearRect(0, 0, this.width, this.width)
     this.layers.draw(command)
     //console.log(this.layers)

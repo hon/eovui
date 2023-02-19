@@ -1,5 +1,5 @@
-import Button from "../src/button";
-import './../src/assets/styles/examples.scss'
+import Button from "./../../src/button";
+import './../../src/assets/styles/examples.scss'
 
 console.log('button page')
 

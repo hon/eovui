@@ -1,5 +1,5 @@
 {
-  "name": "@eovui/base",
+  "name": "@eovui/web",
   "version": "0.0.1",
   "description": "",
   "main": "./dist/index.js",

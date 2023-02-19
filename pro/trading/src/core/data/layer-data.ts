@@ -88,6 +88,7 @@ export class LayerData {
    * 计算图表中其他价格的具体位置
    */
   highestLowestPrice() {
+    console.log(this.getMainLayerData('segment'))
     if (this.getMainLayerData('segment')) {
       // 拷贝data
       let data = this.getMainLayerData('segment').slice(0)
