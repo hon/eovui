@@ -65,12 +65,19 @@ export default class MainChart extends Layer {
     const ctx = self.chart.ctx
     const layerData = this.chart.layers.layerData
 
+    //console.log(layerData.calcHighLowRange())
+
     // 重新设置可是区域的最高价和最低价
-    const highestLowestPrice = layerData.highestLowestPrice()
+    //layerData.calcHighLowRange()
+    const highestLowestPrice = layerData.highLowRange
+    /*
     coord.updateData({
       high: highestLowestPrice[0],
       low: highestLowestPrice[1],
     })
+    */
+    
+    //const highestLowestPrice = layerData.highLowRange
 
     let bodyWidth = this.chart.options.renderUnit.width 
 

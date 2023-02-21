@@ -11,7 +11,7 @@ pnpm run test
 # 例子
 ```bash
 pnpm run dev:example
-# 运行后浏览器访问 http://localhost:8080/example/[button].html
+# 运行后浏览器访问 http://localhost:8080/examples/[button].html
 ```
 
 

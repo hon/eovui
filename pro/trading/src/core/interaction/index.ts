@@ -5,11 +5,10 @@
  * 3. 更新图表
  */
 import Chart from "../chart";
-import { optionsUtil, OptionType } from '@eovui/utils'
+import { optionsUtil, AnyObject} from '@eovui/utils'
 
 export default class Interaction {
-
-  options: OptionType
+  options: AnyObject
   chart: Chart
 
   // Events
@@ -46,24 +45,15 @@ export default class Interaction {
   // 响应式的时候需要重新设置
   centerPoint: {x: number, y: number}
 
-  constructor(options: OptionType) {
+  constructor(options: AnyObject) {
     this.chart = options.chart
 
-    const defaultOptions: OptionType = {
+    const defaultOptions: AnyObject = {
       // coordinateOptions: {},
       // viewOnDataOptions: {},
     }
 
     this.options = optionsUtil.setOptions(defaultOptions, options)
-
-    const chart = this.chart
-    const layerData = chart.layers.layerData
-
-    // 最高价和最低价
-    // const priceRange = layerData.highestLowestPrice()
-
-    // 坐标系统
-    const coord = chart.coordinate
 
 
     const self = this
@@ -71,17 +61,13 @@ export default class Interaction {
     // 鼠标移动事件
     this.mouseMoveEvent(async (evt: any) => {
       self.mousePosition = {x: evt.mouseX, y: evt.mouseY}
-      const priceRange = layerData.highestLowestPrice()
-      coord.updateData({
-        high: priceRange[0],
-        low: priceRange[1],
-      })
 
       // 像素坐标(x)转换成数据索引
-      const dataIndex = coord.calcDataIndex(evt.mouseX)
+      const dataIndex = self.chart.coordinate.calcDataIndex(evt.mouseX)
+      //console.log(dataIndex)
 
       // 像素坐标(y)转换成价格
-      const price = coord.calcDataValue(evt.mouseY)
+      const price = self.chart.coordinate.calcDataValue(evt.mouseY)
       //console.log(price)
 
     })
@@ -122,18 +108,10 @@ export default class Interaction {
         direction: 'left'
       }
     })
-    const chart = this.options.chart
-
     // 修改数据视图的range
-    const range = this.chart.dataView.moveLeft().indexRange
+    this.chart.dataView.moveLeft()
+    this.updateAfterMove()
 
-    // 将range应用到数据
-    //chart.dataSerise.setSegmentRange(range)
-    chart.layers.layerData.setSegmentRange(this.chart.dataView.indexRange)
-
-    // 更新数据
-    // 更新画面
-    chart.draw()
     this.chart.easyEvent.emit('move-end', {
       detail: {
         direction: 'left'
@@ -148,17 +126,10 @@ export default class Interaction {
         direction: 'right'
       }
     })
-    const chart = this.options.chart
     // 修改数据视图的range
-    const range = this.chart.dataView.moveRight().indexRange
+    this.chart.dataView.moveRight()
+    this.updateAfterMove()
 
-    // 将range应用到数据
-    //chart.dataSerise.setSegmentRange(range)
-    chart.layers.layerData.setSegmentRange(this.chart.dataView.indexRange)
-
-
-    // 更新画面
-    chart.draw()
     this.chart.easyEvent.emit('move-end', {
       detail: {
         direction: 'right'
@@ -167,10 +138,35 @@ export default class Interaction {
     return this
   }
 
+  updateAfterMove() {
+    const chart = this.chart
+    // 坐标系统
+    const coord = chart.coordinate
+
+    // 将range应用到数据
+    chart.layers.layerData.setSegmentRange(this.chart.dataView.indexRange)
+
+    // 计算最高价和最低价范围
+    chart.layers.layerData.calcHighLowRange()
+    const priceRange = chart.layers.layerData.highLowRange
+    // 更新坐标系统
+    coord.setOptions({
+      data: {
+        high: priceRange[0],
+        low: priceRange[1],
+      }
+    })
+
+    // 更新画面
+    chart.draw()
+    return this
+
+  }
+
   zoomIn() {
     const chart = this.chart
     this.chart.dataView.zoomIn()
-    this.calcDataViewWidth()
+    this.updateAfterResize()
     // 更新画面
     chart.draw()
     return this
@@ -179,7 +175,7 @@ export default class Interaction {
   reset() {
     const chart = this.chart
     this.chart.dataView.reset()
-    this.calcDataViewWidth()
+    this.updateAfterResize()
     // 更新画面
     chart.draw()
     return this
@@ -193,7 +189,7 @@ export default class Interaction {
     })
     const chart = this.chart
     this.chart.dataView.zoomOut()
-    this.calcDataViewWidth()
+    this.updateAfterResize()
     // 更新画面
     chart.draw()
 
@@ -208,7 +204,7 @@ export default class Interaction {
   /**
    * (重新)计算数据视图宽度
    */
-  calcDataViewWidth() {
+  updateAfterResize() {
     const chart = this.chart
     const viewWidth = this.chart.dataView.viewWidth
     const unitWidth = chart.width / viewWidth
@@ -230,11 +226,24 @@ export default class Interaction {
     // 将range应用到数据
     chart.layers.layerData.setSegmentRange(this.chart.dataView.indexRange)
 
-    // update coordinate
-    this.chart.coordinate.setOptions({offset: {
-      width: bodyWidth,
-      gap,
-    }})
+
+    // 计算最高价和最低价范围
+    chart.layers.layerData.calcHighLowRange()
+    const priceRange = chart.layers.layerData.highLowRange
+
+    // 更新坐标系统
+    this.chart.coordinate.setOptions({
+      offset: {
+        width: bodyWidth,
+        gap,
+      },
+
+      data: {
+        high: priceRange[0],
+        low: priceRange[1],
+      }
+
+    })
 
     return this
   }

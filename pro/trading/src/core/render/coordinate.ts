@@ -128,15 +128,16 @@ export default class Coordinate {
     return this.options.data.high - priceDistance
   }
 
+  
   /**
    * 更新数据
    * 坐标值的计算，有时候要依赖外部数据。当外部数据改变的时候，坐标系统需要知道
    * 比如：图表里的上下价格区间，这是计算比例的基础
    * @param {object} data - 配置项里的动态数据
-   */
   updateData(data: any): Coordinate {
     this.options.data = data
     return this
   }
+   */
 }
 

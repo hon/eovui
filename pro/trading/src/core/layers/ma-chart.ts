@@ -1,16 +1,16 @@
 import { Layer } from './index'
 import Chart from '../chart'
-import { optionsUtil, OptionType } from '@eovui/utils'
+import { optionsUtil, AnyObject} from '@eovui/utils'
 
 /**
  * 移动平均线图表
  */
 export default class MaChart extends Layer{
-  options: OptionType
+  options: AnyObject 
   chart: Chart
   period: number
   algoName: string
-  constructor(options: OptionType) {
+  constructor(options: AnyObject) {
     super()
     const defaultOptions = {
       lineWidth: 1,
@@ -27,7 +27,7 @@ export default class MaChart extends Layer{
     this.name = this.options.name
   }
 
-  setOptions(newOptions: OptionType) {
+  setOptions(newOptions: AnyObject) {
     this.options = optionsUtil.setOptions(this.options, newOptions)
     return this
   }
@@ -56,7 +56,7 @@ export default class MaChart extends Layer{
   draw() {
     const self = this
     const layerData = this.chart.layers.layerData
-    const highestLowestPrice = layerData.highestLowestPrice()
+    const highestLowestPrice = layerData.highLowRange
 
     // body的顶部，距离表上方的距离
     const bodyWidth = self.chart.options.renderUnit.width

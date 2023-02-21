@@ -1,4 +1,3 @@
-import DataSerise from "../data/data-serise"
 import { LayerData } from "../data"
 import {OptionType} from "@eovui/utils"
 
@@ -83,12 +82,10 @@ export class Layer {
 export default class Layers {
   layers: Layer[]
   layerData: LayerData
-  serise: any 
   constructor(serise: any) {
     this.layers = []
-    this.layerData = new LayerData
+    this.layerData = new LayerData(serise)
     this.layerData.mainLayerId = 'main'
-    this.serise = serise
   }
 
   /**
@@ -99,7 +96,7 @@ export default class Layers {
     this.layers.push(layer)
 
     // 添加图层算法
-    this.layerData.addAlgo(layer.id, layer.dataAlgo.bind(layer, this.serise))
+    this.layerData.addAlgo(layer.id, layer.dataAlgo.bind(layer, this.layerData.serise))
 
     // 添加图层数据
     //layer.dataAlgo()

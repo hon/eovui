@@ -98,6 +98,12 @@ export default class Chart {
     this.layers = new Layers(this.serise)
 
 
+
+    // 最高价和最低价
+    //const priceRange = layerData.highestLowestPrice()
+
+    //console.log(priceRange)
+
     //this.mouseMoveEvent()
     this.canvasPosition = this.canvas.getBoundingClientRect()
 
@@ -122,16 +128,28 @@ export default class Chart {
     */
 
 
-    const layerData = this.layers.layerData
-    // 最高价和最低价
-    const priceRange = layerData.highestLowestPrice()
 
     this.initDataView()
+
+
+  }
+
+
+  setOptions(target: OptionType, source: OptionType) {
+    this.options = optionsUtil.setOptions(target, source)
+    return this
+  }
+
+
+  // 初始化坐标系统
+  initCoordinate() {
+    const layerData = this.layers.layerData
+    layerData.calcHighLowRange()
 
     // 初始化主图的坐标系统
     // 如果在主图里面添加其他股票数据的图层，得在那个图层里面再实例化Coordinate
     // 然后根据具体的数据计算那个图层需要使用的坐标系统
-    const mainCoord = new Coordinate({
+    const coord = new Coordinate({
       // 视觉信息
       width: this.width,
       height: this.height,
@@ -144,8 +162,8 @@ export default class Chart {
 
       // 数据信息
       data: {
-        high: priceRange[0],
-        low: priceRange[1],
+        high: layerData.highLowRange[0],
+        low: layerData.highLowRange[1],
       },
 
       // 水平偏移
@@ -158,15 +176,8 @@ export default class Chart {
       }
     })
 
-    this.coordinate = mainCoord
+    this.coordinate = coord
 
-
-  }
-
-
-  setOptions(target: OptionType, source: OptionType) {
-    this.options = optionsUtil.setOptions(target, source)
-    return this
   }
 
 
@@ -221,7 +232,7 @@ export default class Chart {
   initDataView() {
     const viewWidth = Math.floor(this.width / (this.options.renderUnit.width + this.options.renderUnit.gap))
     this.dataView = new DataView({
-      totalDataLength: this.layers.layerData.data.length,
+      totalDataLength: this.layers.layerData.serise.length,
       defaultViewWidth: viewWidth,
     })
     this.layers.layerData.setSegmentRange(this.dataView.indexRange)

@@ -11,6 +11,8 @@ export class LayerData {
   // 存放各图层的算法函数
   algos: any
 
+  serise: any
+
   // 主图层id
   mainLayerId: string
 
@@ -23,11 +25,13 @@ export class LayerData {
   // 所有图层的最高最低价区间
   allHighLowRange: [number, number]
 
-  constructor() {
+  constructor(serise: any) {
     this.data = {
       algo: {},
       segment: {},
     }
+
+    this.serise = serise
 
     // 数据段的范围, 图表里显示的数据
     this.segmentRange = [
@@ -97,6 +101,50 @@ export class LayerData {
       return [highestPrice, lowestPrice]
     }
     return [0, 0]
+  }
+
+
+  /** 
+   * 最高价和最低价，这里的最高价和最低价未来可能还会包含其他方面的价格
+   * 计算最高价和最低价的目的事为了确定图表中可见部分的价格区间范围。然后根据这两个价格的距离
+   * 计算图表中其他价格的具体位置
+   */
+  calcHighLowRange() {
+    if (this.getMainLayerData('segment')) {
+      // 比较主图层数据
+      // 拷贝data
+      let data = this.getMainLayerData('segment').slice(0)
+      let highestPrice = data.sort((a: IDataItem, b: IDataItem) => b.high - a.high)[0].high
+      let lowestPrice = data.sort((a: IDataItem, b: IDataItem) => a.low - b.low)[0].low
+      // 主图层的价格区间
+      const mainRange: [number, number] = [highestPrice, lowestPrice]
+
+      /*
+      const low = []
+      const high = []
+      // 比较其他图层数据
+      for (let [k, v] of Object.entries(this.data.segment)) {
+        if (k !== 'main' && Array.isArray(v)) {
+          const data = v.slice(0)
+          low.push(Math.min(...data))
+          high.push(Math.max(...data))
+        }
+      }
+
+      low.push(lowestPrice)
+      high.push(highestPrice)
+
+      this.highLowRange = [Math.max(...high), Math.min(...low)]
+      */
+     this.highLowRange = mainRange
+
+    } else {
+
+      this.highLowRange = [0, 0]
+    }
+    return this
+
+
   }
 
   /**

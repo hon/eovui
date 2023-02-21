@@ -28,9 +28,11 @@ document.getElementById('load-data').addEventListener('click', evt => {
   run(symbolVal, parseInt(sizeVal))
 }, false)
 
+/*
 $('canvas1').addEventListener('eov-move-start', evt => {
   console.log(`Event Fired:`, evt)
 })
+*/
 
 ;(async function() {
   const sourceData = new SourceData({})
@@ -111,6 +113,9 @@ $('canvas1').addEventListener('eov-move-start', evt => {
     ma30, 
     cursor,
   ])
+
+  // 初始化坐标系统
+  chart.initCoordinate()
 
 
   // 重绘整个图表
