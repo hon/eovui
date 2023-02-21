@@ -98,7 +98,6 @@ export /*default*/ class DataSerise1{
               item.open, 
               item.close, 
               item.low, 
-              item.time
           )
         })
         dataItems.reverse().forEach((item: IDataItem) => {

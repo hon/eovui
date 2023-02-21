@@ -16,6 +16,8 @@ export default class MaChart extends Layer{
       lineWidth: 1,
       lineColor: '#ffcc33',
       period: 5, 
+      // 基于那个价格进行计算
+      basePrice: 'close'
     }
     this.options = optionsUtil.setOptions(defaultOptions, options)
 
@@ -38,11 +40,15 @@ export default class MaChart extends Layer{
     let maData = []
     const n = this.period
     const dataLen = data.length
+    const basePrice = this.options.basePrice
+
 
     for (let i = 0; i < dataLen; i++) {
       const copyData = data.slice(dataLen - (n + i), dataLen - i)
       if (copyData.length == n) {
-        const average = copyData.reduce((pre: any, cur: any) => pre + cur.close, 0) / n
+        const average = copyData.reduce((pre: any, cur: any) => {
+          return pre + cur.ohlc[basePrice]
+        }, 0) / n
         maData.unshift(average)
       } else {
         maData.unshift(undefined)
@@ -72,18 +78,22 @@ export default class MaChart extends Layer{
     //ctx.save()
     ctx.beginPath()
     maData.forEach((item: any, idx: any) => {
-      if (idx >= self.period - 1) {
-        const x = idx * (bodyWidth + gap) / dpr + bodyWidth / 4
-        let y = self.chart.options.paddingTop / dpr
-        y += coord.calcHeight((highestLowestPrice[0] - item)) / dpr
-        if (idx == self.period -1) {
-          ctx.moveTo(x, y)
-        } else {
-          ctx.lineTo(x, y)
-          ctx.strokeStyle = self.options.lineColor
-          ctx.lineWidth = self.options.lineWidth / dpr
-        }
+      let x = 0
+      if (idx > 0) {
+        x = idx * (bodyWidth + gap) / dpr + bodyWidth / 4
       }
+
+      let y = self.chart.options.paddingTop / dpr
+      y += coord.calcHeight((highestLowestPrice[0] - item)) / dpr
+      /*
+      if (idx == self.period -1) {
+        ctx.moveTo(x, y)
+      } else {
+      */
+        ctx.lineTo(x, y)
+        ctx.strokeStyle = self.options.lineColor
+        ctx.lineWidth = self.options.lineWidth / dpr
+      //}
     })
     ctx.stroke()
     ctx.closePath()

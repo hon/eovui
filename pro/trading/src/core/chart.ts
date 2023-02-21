@@ -131,6 +131,8 @@ export default class Chart {
 
     this.initDataView()
 
+    console.log(this.layers)
+
 
   }
 

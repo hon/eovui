@@ -64,12 +64,16 @@ export default class Interaction {
 
       // 像素坐标(x)转换成数据索引
       const dataIndex = self.chart.coordinate.calcDataIndex(evt.mouseX)
-      //console.log(dataIndex)
+      console.log(dataIndex)
 
       // 像素坐标(y)转换成价格
       const price = self.chart.coordinate.calcDataValue(evt.mouseY)
       //console.log(price)
 
+    })
+
+    this.chart.canvas.addEventListener('mousedown', (evt: any) => {
+      self.isMouseDown = true
     })
 
   }

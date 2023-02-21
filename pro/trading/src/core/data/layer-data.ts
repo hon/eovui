@@ -19,11 +19,12 @@ export class LayerData {
   // 数据段区间
   segmentRange: any
 
-  // 最高最低价区间
+  // 所有图层的最高最低价区间
   highLowRange: [number, number]
 
-  // 所有图层的最高最低价区间
-  allHighLowRange: [number, number]
+  // 主图层的最高最低价区间
+  mainHighLowRange: [number, number]
+
 
   constructor(serise: any) {
     this.data = {
@@ -46,16 +47,13 @@ export class LayerData {
     // dataItems里的最高价和最低价范围
     this.highLowRange = [0, 0]
 
-    // 所有的数据的最高价和最低价范围
-    this.allHighLowRange = [0, 0]
-
     // 设置数据段， 初始化的时候，segmentData为整个data的浅拷贝
     this.segment()
   }
 
 
   // 获取主图层的数据
-  getMainLayerData(key: string = 'algo'): Array<DataItem> | undefined {
+  getMainLayerData(key: string = 'algo'): Array<any> | undefined {
     if (this.mainLayerId != '') {
       return this.data[key][this.mainLayerId]
     }
@@ -86,23 +84,6 @@ export class LayerData {
     return this
   }
 
-  /** 
-   * 最高价和最低价，这里的最高价和最低价未来可能还会包含其他方面的价格
-   * 计算最高价和最低价的目的事为了确定图表中可见部分的价格区间范围。然后根据这两个价格的距离
-   * 计算图表中其他价格的具体位置
-   */
-  highestLowestPrice() {
-    console.log(this.getMainLayerData('segment'))
-    if (this.getMainLayerData('segment')) {
-      // 拷贝data
-      let data = this.getMainLayerData('segment').slice(0)
-      let highestPrice = data.sort((a: IDataItem, b: IDataItem) => b.high - a.high)[0].high
-      let lowestPrice = data.sort((a: IDataItem, b: IDataItem) => a.low - b.low)[0].low
-      return [highestPrice, lowestPrice]
-    }
-    return [0, 0]
-  }
-
 
   /** 
    * 最高价和最低价，这里的最高价和最低价未来可能还会包含其他方面的价格
@@ -114,11 +95,16 @@ export class LayerData {
       // 比较主图层数据
       // 拷贝data
       let data = this.getMainLayerData('segment').slice(0)
-      let highestPrice = data.sort((a: IDataItem, b: IDataItem) => b.high - a.high)[0].high
-      let lowestPrice = data.sort((a: IDataItem, b: IDataItem) => a.low - b.low)[0].low
+      //let highestPrice = data.sort((a: IDataItem, b: IDataItem) => b.high - a.high)[0].high
+      let highestPrice = data.sort((a: any, b: any) => b.ohlc.high - a.ohlc.high)[0].ohlc.high
+      //let lowestPrice = data.sort((a: IDataItem, b: IDataItem) => a.low - b.low)[0].low
+      let lowestPrice = data.sort((a: any, b: any) => a.ohlc.low - b.ohlc.low)[0].ohlc.low
       // 主图层的价格区间
       const mainRange: [number, number] = [highestPrice, lowestPrice]
 
+
+      // 设置主图层价格区间
+      this.mainHighLowRange = mainRange
       /*
       const low = []
       const high = []
@@ -139,7 +125,7 @@ export class LayerData {
      this.highLowRange = mainRange
 
     } else {
-
+      this.mainHighLowRange = [0, 0] 
       this.highLowRange = [0, 0]
     }
     return this

@@ -84,7 +84,9 @@ export default class MainChart extends Layer {
     // 每个蜡烛图之间的间距
     let gap = this.chart.options.renderUnit.gap
 
-    layerData.data.segment[this.id].forEach((dataItem: any, idx: number) => {
+    layerData.data.segment[this.id].forEach((data: any, idx: number) => {
+      const dataItem = data.ohlc
+
       // 绘制主图
       const drawKline = () => {
         const bodyOffset = idx * (bodyWidth + gap)
@@ -99,6 +101,7 @@ export default class MainChart extends Layer {
 
         // 实体的高度
         const bodyHeight = coord.calcHeight(dataItem.openCloseDistance())
+
 
         if (dataItem.isBull()) {
           bodyTopHeight += coord.calcHeight((highestLowestPrice[0] - dataItem.close))
@@ -115,6 +118,7 @@ export default class MainChart extends Layer {
 
         // 尾部的Y
         const tailY = bodyTopHeight + bodyHeight
+
 
         let marketType = 'shake'
 
