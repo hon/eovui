@@ -4,6 +4,7 @@ import { Evt, optionsUtil, OptionType } from '@eovui/utils'
 import Coordinate from "./render/coordinate";
 import DataView from "./data/data-view";
 
+const dpr = window.devicePixelRatio 
 
 /**
  * 主要功能
@@ -69,14 +70,14 @@ export default class Chart {
       selector: '',
 
       // 图表上方的padding
-      paddingTop: 100,
+      paddingTop: 100 / dpr,
       // 图表下方的padding
-      paddingBottom: 100,
+      paddingBottom: 100 / dpr,
 
       // 渲染单元信息, 主图里面（是蜡烛图)
       renderUnit: {
-        width: 16,
-        gap: 2,
+        width: 16 / dpr,
+        gap: 2 / dpr,
       },
     }
 
@@ -92,8 +93,8 @@ export default class Chart {
 
     this.canvas = canvas
     this.ctx = ctx
-    this.width = width 
-    this.height = height
+    this.width = width / dpr 
+    this.height = height / dpr
     this.styleWidth = styleWidth
     this.styleHeight = styleHeight
 

@@ -1,4 +1,5 @@
 import { optionsUtil, OptionType } from '@eovui/utils'
+
 const dpr = window.devicePixelRatio 
 /**
  * 蜡烛图, 绘制单个的蜡烛图
@@ -63,8 +64,8 @@ export default class CandleStick {
 
   // 绘制蜡烛图实体
   drawBody() {
-    const bodyHeight = this.body.height / dpr
-    this.ctx.fillRect(this.body.x / dpr, this.body.y / dpr, this.body.width / dpr, 
+    const bodyHeight = this.body.height 
+    this.ctx.fillRect(this.body.x, this.body.y, this.body.width, 
       bodyHeight == 0 ? 1 : bodyHeight)
     return this
   }
@@ -72,15 +73,15 @@ export default class CandleStick {
 
   // 绘制蜡烛图上影线
   drawHead() {
-    const x = this.body.x + (this.body.width / dpr - 1)
-    this.ctx.fillRect(x / dpr, this.head.y / dpr, 1, this.head.height / dpr)
+    const x = this.body.x + this.body.width / 2 - 1 / dpr
+    this.ctx.fillRect(x, this.head.y, 1, this.head.height)
     return this
   }
 
   // 绘制蜡烛图下影线
   drawTail() {
-    const x = this.body.x + (this.body.width / dpr - 1)
-    this.ctx.fillRect(x / dpr, this.tail.y / dpr, 1, this.tail.height / dpr)
+    const x = this.body.x + this.body.width / 2 - 1 / dpr
+    this.ctx.fillRect(x, this.tail.y, 1, this.tail.height)
     return this
   }
 

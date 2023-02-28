@@ -69,8 +69,6 @@ export default class Interaction {
     this.chart.canvas.addEventListener('mousedown', (evt: any) => {
       self.isMouseDown = true
     })
-
-
   }
 
   /**
@@ -78,7 +76,7 @@ export default class Interaction {
    */
   cachePxOfRu() {
     const coord = this.chart.coordinate
-    const viewWidth = coord.calcDataIndex(this.chart.styleWidth)
+    const viewWidth = coord.calcDataIndex(this.chart.width)
     const midPoints = []
     const ruWidth = coord.unitWidthInPx()
     this.cacheData = {}
@@ -98,7 +96,7 @@ export default class Interaction {
     this.chart.canvas.addEventListener('mousemove', (evt: any) => {
       const mouseX = evt.x - this.chart.canvasPosition.x
       const mouseY = evt.y - this.chart.canvasPosition.y
-      const cacheData = this.cacheData
+      const cacheData = self.cacheData
 
 
       // 像素坐标(x)转换成数据索引
@@ -106,11 +104,11 @@ export default class Interaction {
 
       // 像素坐标(y)转换成数值
       const pixelValue = self.chart.coordinate.calcDataValue(mouseY)
-      console.log(dataIndex, cacheData)
+      //console.log(pixelValue)
 
       cacheData.mouseX = mouseX
       cacheData.mouseY = mouseY
-      cacheData.isMouseDown = this.isMouseDown
+      cacheData.isMouseDown = self.isMouseDown
       cacheData.dataIndex = dataIndex
       cacheData.pixelValue = pixelValue
 

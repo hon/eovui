@@ -2,7 +2,6 @@ import { Layer } from './index'
 import Chart from '../chart'
 import { optionsUtil, OptionType } from '@eovui/utils'
 
-const dpr = window.devicePixelRatio
 // 游标
 export default class Cursor extends Layer {
   options: OptionType
@@ -27,7 +26,7 @@ export default class Cursor extends Layer {
       const self = this
       this.chart.interaction.mouseMoveEvent((evt: any) => {
         const index = evt.cacheData.dataIndex
-        self.mouseX = evt.cacheData.midPointsOfRu[index] / dpr
+        self.mouseX = evt.cacheData.midPointsOfRu[index]
         self.mouseY = evt.cacheData.mouseY
       })
     }

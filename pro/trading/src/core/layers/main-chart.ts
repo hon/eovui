@@ -60,7 +60,6 @@ export default class MainChart extends Layer {
    */
   draw() {
     const self = this
-    const dpr = window.devicePixelRatio
     const coord = this.chart.coordinate
     const ctx = self.chart.ctx
     const layerData = this.chart.layers.layerData
@@ -152,10 +151,10 @@ export default class MainChart extends Layer {
         // 显示最高价和最低价
         // todo 如果有多个最高价或多个最低价，现实会重叠
         if (dataItem.high == highestLowestPrice[0]) {
-          self.text(dataItem.high, bodyOffset / dpr, self.chart.options.paddingTop / dpr)
+          self.text(dataItem.high, bodyOffset, self.chart.options.paddingTop)
         }
         if (dataItem.low == highestLowestPrice[1]) {
-          self.text(dataItem.low, bodyOffset / dpr, (bodyTopHeight + bodyHeight + tailHeight) / dpr + 4, 'top')
+          self.text(dataItem.low, bodyOffset, (bodyTopHeight + bodyHeight + tailHeight) + 4, 'top')
         }
       }
 

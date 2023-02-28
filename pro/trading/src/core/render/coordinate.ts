@@ -1,6 +1,6 @@
 import {optionsUtil, AnyObject } from '@eovui/utils'
 
-const dpr = window.devicePixelRatio
+
 
 /**
  * 坐标系统: 很多图表都需要根据数据来映射界面里的像素值，或者根据像素值映射出数据，因此将坐标系统
@@ -11,6 +11,7 @@ const dpr = window.devicePixelRatio
 
 export default class Coordinate {
   options: AnyObject
+  dpr: number
   constructor(options: AnyObject) {
     const defaultOptions = {
       // 视觉信息
@@ -43,6 +44,8 @@ export default class Coordinate {
     }
 
     this.options = optionsUtil.setOptions(defaultOptions, options)
+
+    this.dpr = window.devicePixelRatio
   }
 
   setOptions(newOptions: AnyObject) {
@@ -105,7 +108,7 @@ export default class Coordinate {
    */
   calcDataIndex(x: number): number {
     const width = x - this.options.padding.left
-    return Math.floor(width / (this.unitWidthInPx() / dpr))
+    return Math.floor(width / this.unitWidthInPx())
   }
 
   /**
@@ -113,13 +116,13 @@ export default class Coordinate {
    */
   calcDataValue(y: number): number {
     // 现在要计算的是逻辑像素距离和价格距离的比值，因此要除以pdr
-    let ratio = this.heightAndDataRatio() / dpr
+    let ratio = this.heightAndDataRatio()
 
     // 经过公式变形得到，求价格距离的系数为 1 / ratio
     ratio = 1 / ratio
 
     // 像素距离
-    const height = y - this.options.padding.top / dpr
+    const height = y - this.options.padding.top
 
     // 计算价格距离
     const priceDistance = ratio * height

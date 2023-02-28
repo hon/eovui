@@ -83,11 +83,12 @@ $('canvas1').addEventListener('eov-move-start', evt => {
 
   // Step 6: 添加其他图层
   // 定义Ma(10)图层
+  const lineWidth = 2
   const ma10 = new MaChart({
     chart,
     period: 10,
     lineColor: '#3399ff',
-    lineWidth: 2,
+    lineWidth,
     id: 'ma10',
     name: '10日移动平均线图',
   })
@@ -97,7 +98,7 @@ $('canvas1').addEventListener('eov-move-start', evt => {
     chart,
     period: 20,
     lineColor: '#cc3399',
-    lineWidth: 2,
+    lineWidth,
     id: 'ma20',
     name: '20日移动平均线图',
   })
@@ -107,7 +108,7 @@ $('canvas1').addEventListener('eov-move-start', evt => {
     chart,
     period: 50,
     lineColor: '#66ff33',
-    lineWidth: 2,
+    lineWidth,
     id: 'ma50',
     name: '50日移动平均线图',
   })

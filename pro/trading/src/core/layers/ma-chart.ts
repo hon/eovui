@@ -70,7 +70,6 @@ export default class MaChart extends Layer{
     // 每个蜡烛图之间的间距
     let gap = self.chart.options.renderUnit.gap
     const ctx = self.chart.ctx
-    const dpr = window.devicePixelRatio
 
     const maData = layerData.data.segment[this.id]
     const coord = self.chart.coordinate
@@ -80,14 +79,14 @@ export default class MaChart extends Layer{
     maData.forEach((item: any, idx: any) => {
       let x = 0
       if (idx > 0) {
-        x = idx * (bodyWidth + gap) / dpr + bodyWidth / 4
+        x = idx * (bodyWidth + gap) + bodyWidth / 4
       }
 
-      let y = self.chart.options.paddingTop / dpr
-      y += coord.calcHeight((highestLowestPrice[0] - item)) / dpr
+      let y = self.chart.options.paddingTop
+      y += coord.calcHeight((highestLowestPrice[0] - item))
       ctx.lineTo(x, y)
       ctx.strokeStyle = self.options.lineColor
-      ctx.lineWidth = self.options.lineWidth / dpr
+      ctx.lineWidth = self.options.lineWidth / coord.dpr
     })
     ctx.stroke()
     ctx.closePath()
