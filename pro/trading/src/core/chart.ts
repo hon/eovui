@@ -14,6 +14,8 @@ import DataView from "./data/data-view";
  */
 export default class Chart {
   options: OptionType
+  // 完整的交易图表会用到多个Chart实例
+  id: string
   canvas: HTMLCanvasElement
   ctx: CanvasRenderingContext2D
 
@@ -86,6 +88,7 @@ export default class Chart {
       styleHeight
     } = this.initCanvas(document.querySelector(this.options.selector))
 
+    const self = this
 
     this.canvas = canvas
     this.ctx = ctx
@@ -95,38 +98,19 @@ export default class Chart {
     this.styleHeight = styleHeight
 
 
+    this.canvasPosition = this.canvas.getBoundingClientRect()
+
     this.layers = new Layers(this.serise)
 
-
-
-    // 最高价和最低价
-    //const priceRange = layerData.highestLowestPrice()
-
-    //console.log(priceRange)
-
-    //this.mouseMoveEvent()
-    this.canvasPosition = this.canvas.getBoundingClientRect()
 
     // 创建自定义事件，所有的事件都绑定到this.canvas元素上
     this.easyEvent = new Evt({
       target: this.canvas
     })
 
-    const self = this
     window.addEventListener('resize', () => {
       self.canvasPosition = self.canvas.getBoundingClientRect()
     })
-
-    /*
-    this.canvas.addEventListener('mousedown', (evt: any) => {
-      self.mouseDown = true
-    })
-
-    this.canvas.addEventListener('mouseup', (evt: any) => {
-      self.mouseDown = false
-    })
-    */
-
 
 
     this.initDataView()
@@ -163,7 +147,7 @@ export default class Chart {
       },
 
       // 数据信息
-      data: {
+      highLowRange: {
         high: layerData.highLowRange[0],
         low: layerData.highLowRange[1],
       },
@@ -179,6 +163,7 @@ export default class Chart {
     })
 
     this.coordinate = coord
+    return this
 
   }
 

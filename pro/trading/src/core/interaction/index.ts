@@ -11,6 +11,10 @@ export default class Interaction {
   options: AnyObject
   chart: Chart
 
+  // 当进行移动或缩放操作时，将一些数据缓存下来，而不是每次（鼠标移动）都去计算
+  // 这个数据很多都是跟图层数据对应的，但有一些不是，因此没有放到图层数据上面
+  cacheData: AnyObject
+
   // Events
   // triggered just after start to zoom in
   // on('zoom-in-start')
@@ -55,28 +59,38 @@ export default class Interaction {
 
     this.options = optionsUtil.setOptions(defaultOptions, options)
 
-
     const self = this
 
+    this.cachePxOfRu()
+
     // 鼠标移动事件
-    this.mouseMoveEvent(async (evt: any) => {
-      self.mousePosition = {x: evt.mouseX, y: evt.mouseY}
-
-      // 像素坐标(x)转换成数据索引
-      const dataIndex = self.chart.coordinate.calcDataIndex(evt.mouseX)
-      console.log(dataIndex)
-
-      // 像素坐标(y)转换成价格
-      const price = self.chart.coordinate.calcDataValue(evt.mouseY)
-      //console.log(price)
-
-    })
+    this.mouseMoveEvent((evt: any) => {})
 
     this.chart.canvas.addEventListener('mousedown', (evt: any) => {
       self.isMouseDown = true
     })
 
+
   }
+
+  /**
+   * 缓存渲染单元的像素坐标, 这样就不需要鼠标每移动一次就计算一次，从而提高性能
+   */
+  cachePxOfRu() {
+    const coord = this.chart.coordinate
+    const viewWidth = coord.calcDataIndex(this.chart.styleWidth)
+    const midPoints = []
+    const ruWidth = coord.unitWidthInPx()
+    this.cacheData = {}
+    for (let i = 0; i < viewWidth; i++) {
+      const x = coord.calcX(i)
+      midPoints.push(x[1])
+    }
+
+
+    this.cacheData.midPointsOfRu = midPoints
+    return this
+  } 
 
   mouseMoveEvent(cb: Function) {
     const self = this
@@ -84,11 +98,26 @@ export default class Interaction {
     this.chart.canvas.addEventListener('mousemove', (evt: any) => {
       const mouseX = evt.x - this.chart.canvasPosition.x
       const mouseY = evt.y - this.chart.canvasPosition.y
-      evt.mouseX = mouseX
-      evt.mouseY = mouseY
-      evt.mouseDown = self.isMouseDown
+      const cacheData = this.cacheData
 
-      cb && cb(evt)
+
+      // 像素坐标(x)转换成数据索引
+      const dataIndex = self.chart.coordinate.calcDataIndex(mouseX)
+
+      // 像素坐标(y)转换成数值
+      const pixelValue = self.chart.coordinate.calcDataValue(mouseY)
+      console.log(dataIndex, cacheData)
+
+      cacheData.mouseX = mouseX
+      cacheData.mouseY = mouseY
+      cacheData.isMouseDown = this.isMouseDown
+      cacheData.dataIndex = dataIndex
+      cacheData.pixelValue = pixelValue
+
+      cb && cb({
+        event: evt,
+        cacheData,
+      })
 
       self.chart.draw({
         ignoreAlgo: true 
@@ -97,14 +126,6 @@ export default class Interaction {
 
   }
 
-  /**
-   * 用渲染单元来计数的试图宽度
-   * 渲染单元是每个数据项对应的视觉渲染元素。
-   */
-  viewWidthByRenderUnit() {
-    const chart = this.options.chart
-    return Math.floor(chart.width / (chart.options.renderUnit.width + chart.options.renderUnit.gap))
-  }
 
   moveLeft() {
     this.chart.easyEvent.emit('move-start', {
@@ -144,22 +165,32 @@ export default class Interaction {
 
   updateAfterMove() {
     const chart = this.chart
+    const layerData = chart.layers.layerData
     // 坐标系统
     const coord = chart.coordinate
 
     // 将range应用到数据
-    chart.layers.layerData.setSegmentRange(this.chart.dataView.indexRange)
+    layerData.setSegmentRange(this.chart.dataView.indexRange)
 
     // 计算最高价和最低价范围
-    chart.layers.layerData.calcHighLowRange()
-    const priceRange = chart.layers.layerData.highLowRange
+    layerData.calcHighLowRange()
+
+    const priceRange = layerData.highLowRange
     // 更新坐标系统
     coord.setOptions({
-      data: {
+      highLowRange: {
         high: priceRange[0],
         low: priceRange[1],
       }
     })
+
+    layerData.setCacheDataToSegment([{
+      renderUnit: 0
+    }, {
+      renderUnit: 1
+    }])
+
+    this.cachePxOfRu()
 
     // 更新画面
     chart.draw()
@@ -242,12 +273,13 @@ export default class Interaction {
         gap,
       },
 
-      data: {
+      highLowRange: {
         high: priceRange[0],
         low: priceRange[1],
       }
 
     })
+    this.cachePxOfRu()
 
     return this
   }

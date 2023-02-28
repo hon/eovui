@@ -50,8 +50,10 @@ $('canvas1').addEventListener('eov-move-start', evt => {
   }
   )
 
+  // Step 1: 新建图表
   const chart = new Chart({
     selector: '#canvas1',
+    // Step 2: 添加数据
     serise,
     /*
     renderUnit: {
@@ -60,8 +62,6 @@ $('canvas1').addEventListener('eov-move-start', evt => {
     }
     */
   })
-    // 可交换图标
-    .interactable(true)
 
   // 定义蜡烛图图层
   const kl = new MainChart({
@@ -70,6 +70,18 @@ $('canvas1').addEventListener('eov-move-start', evt => {
     name: 'K线图',
   })
 
+  // Step 3: 添加主图层
+  chart.layers.addLayers([
+    kl,
+  ])
+
+  // Step 4: 初始化坐标系统
+  chart.initCoordinate()
+    // Step 5(可选): 可交换图表
+    .interactable(true)
+
+
+  // Step 6: 添加其他图层
   // 定义Ma(10)图层
   const ma10 = new MaChart({
     chart,
@@ -108,9 +120,6 @@ $('canvas1').addEventListener('eov-move-start', evt => {
     name: '鼠标游标',
   })
 
-  // 清理图层
-  chart.layers.clearLayers()
-  // 添加图层
   chart.layers.addLayers([
     kl,
     ma10, 
@@ -119,11 +128,8 @@ $('canvas1').addEventListener('eov-move-start', evt => {
     cursor,
   ])
 
-  // 初始化坐标系统
-  chart.initCoordinate()
 
-
-  // 重绘整个图表
+  // Step 7: 绘制图表
   chart.draw()
 
 

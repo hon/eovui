@@ -85,15 +85,9 @@ export default class MaChart extends Layer{
 
       let y = self.chart.options.paddingTop / dpr
       y += coord.calcHeight((highestLowestPrice[0] - item)) / dpr
-      /*
-      if (idx == self.period -1) {
-        ctx.moveTo(x, y)
-      } else {
-      */
-        ctx.lineTo(x, y)
-        ctx.strokeStyle = self.options.lineColor
-        ctx.lineWidth = self.options.lineWidth / dpr
-      //}
+      ctx.lineTo(x, y)
+      ctx.strokeStyle = self.options.lineColor
+      ctx.lineWidth = self.options.lineWidth / dpr
     })
     ctx.stroke()
     ctx.closePath()

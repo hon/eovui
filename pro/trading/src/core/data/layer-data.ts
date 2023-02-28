@@ -19,10 +19,10 @@ export class LayerData {
   // 数据段区间
   segmentRange: any
 
-  // 所有图层的最高最低价区间
+  // 所有图层的最高最低价区间，坐标系统以此来确定数量和像素的比例
   highLowRange: [number, number]
 
-  // 主图层的最高最低价区间
+  // 主图层的最高最低价区间, 用来标记图表上的最高价和最低价
   mainHighLowRange: [number, number]
 
 
@@ -58,6 +58,20 @@ export class LayerData {
       return this.data[key][this.mainLayerId]
     }
     return undefined
+  }
+
+  // 往主图层的segment设置缓存数据
+  setCacheDataToSegment(data: Array<any>) {
+    const mainSegmentData = this.getMainLayerData('segment')
+    if (mainSegmentData !== undefined) {
+      mainSegmentData.forEach((item, idx) => {
+        if (item.cache === undefined) {
+          item.cache = {}
+        }
+        item.cache = data[idx]
+      })
+    }
+    return this
   }
 
   /**
@@ -105,13 +119,13 @@ export class LayerData {
 
       // 设置主图层价格区间
       this.mainHighLowRange = mainRange
-      /*
+
       const low = []
       const high = []
       // 比较其他图层数据
       for (let [k, v] of Object.entries(this.data.segment)) {
         if (k !== 'main' && Array.isArray(v)) {
-          const data = v.slice(0)
+          const data = v.slice(0).filter(d => d !== undefined)
           low.push(Math.min(...data))
           high.push(Math.max(...data))
         }
@@ -121,8 +135,6 @@ export class LayerData {
       high.push(highestPrice)
 
       this.highLowRange = [Math.max(...high), Math.min(...low)]
-      */
-     this.highLowRange = mainRange
 
     } else {
       this.mainHighLowRange = [0, 0] 

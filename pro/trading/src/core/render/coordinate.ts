@@ -1,15 +1,17 @@
-import { optionsUtil, OptionType } from '@eovui/utils'
+import {optionsUtil, AnyObject } from '@eovui/utils'
+
+const dpr = window.devicePixelRatio
 
 /**
  * 坐标系统: 很多图表都需要根据数据来映射界面里的像素值，或者根据像素值映射出数据，因此将坐标系统
  * 分离出来。
  * 主要功能: 像素坐标和渲染单位坐标的互相转化
- * 注意：像素坐标通常是从界面中直接获得。因此是逻辑像素而非canvas环境里使用的，绘图像素。
+ * 注意：像素坐标通常是从界面中直接获得。因此是可见的像素而非canvas环境里使用的，绘图像素。
  */
 
 export default class Coordinate {
-  options: OptionType
-  constructor(options: OptionType) {
+  options: AnyObject
+  constructor(options: AnyObject) {
     const defaultOptions = {
       // 视觉信息
       width: 0,
@@ -22,7 +24,7 @@ export default class Coordinate {
       },
 
       // 数据信息
-      data: {
+      highLowRange: {
         // 可见区域内的最高价
         high: 0,
 
@@ -41,10 +43,9 @@ export default class Coordinate {
     }
 
     this.options = optionsUtil.setOptions(defaultOptions, options)
-
   }
 
-  setOptions(newOptions: OptionType) {
+  setOptions(newOptions: AnyObject) {
     this.options = optionsUtil.setOptions(this.options, newOptions)
     return this
   }
@@ -55,7 +56,7 @@ export default class Coordinate {
   heightAndDataRatio() {
     const options = this.options
     const validateHeight = options.height - (options.padding.top + options.padding.bottom)
-    const dataDistance = options.data.high - options.data.low
+    const dataDistance = options.highLowRange.high - options.highLowRange.low
     return validateHeight / dataDistance
   }
 
@@ -86,7 +87,10 @@ export default class Coordinate {
    * @return 计算出来的水平值是一个范围
    */
   calcX(dataIndex: number): Array<number> {
-    return []
+    const endPoint = this.unitWidthInPx() * (dataIndex + 1)
+    const startPoint = endPoint - this.unitWidthInPx()
+    const midPoint = startPoint + (this.unitWidthInPx() - this.options.offset.gap) / 2
+    return [startPoint, midPoint, endPoint]
   }
   /**
    * 根据数值（通常是价格）计算像素点y的值
@@ -97,18 +101,17 @@ export default class Coordinate {
 
   /**
    * 根据某个（像素）点x的位置，计算数值的索引
+   * 如果要计算整个图表的渲染单元宽度，则将x的值设置为图表的像素宽度
    */
   calcDataIndex(x: number): number {
-    const dpr = window.devicePixelRatio
     const width = x - this.options.padding.left
-    return Math.floor(width / ((this.options.offset.width + this.options.offset.gap) / dpr))
+    return Math.floor(width / (this.unitWidthInPx() / dpr))
   }
 
   /**
    * 根据某个（像素）点y的值，计算对应的数值
    */
   calcDataValue(y: number): number {
-    const dpr = window.devicePixelRatio
     // 现在要计算的是逻辑像素距离和价格距离的比值，因此要除以pdr
     let ratio = this.heightAndDataRatio() / dpr
 
@@ -125,9 +128,24 @@ export default class Coordinate {
     // const highestLowestPrice = this.dataSerise.highestLowestPrice()
 
     // 求得价格距离和最高阶的距离
-    return this.options.data.high - priceDistance
+    return this.options.highLowRange.high - priceDistance
   }
 
+  /**
+   * 每个渲染单元的像素宽度
+   */
+  unitWidthInPx() {
+    return this.options.offset.width + this.options.offset.gap
+  }
+
+  /**
+   * 像素宽度转换成渲染单元宽度
+   * 渲染单元是每个数据项对应的视觉渲染元素。
+   * @param {number} width - 像素宽度
+   */
+  pxWidthToRuWidth(width: number): number {
+    return Math.floor(width / this.unitWidthInPx())
+  }
   
   /**
    * 更新数据
