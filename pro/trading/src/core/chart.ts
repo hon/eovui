@@ -1,6 +1,6 @@
 import Layers from './layers'
 import Interaction from './interaction'
-import { Evt, optionsUtil, OptionType } from '@eovui/utils'
+import { AnyObject, Evt, optionsUtil, OptionType } from '@eovui/utils'
 import Coordinate from "./render/coordinate";
 import DataView from "./data/data-view";
 
@@ -26,11 +26,6 @@ export default class Chart {
   // Height of canvas draw enviroment
   height: number
 
-  // Width of canvas on screen
-  styleWidth: number
-
-  // Height of canvas on screen
-  styleHeight: number
 
   layers: Layers
 
@@ -95,8 +90,6 @@ export default class Chart {
     this.ctx = ctx
     this.width = width / dpr 
     this.height = height / dpr
-    this.styleWidth = styleWidth
-    this.styleHeight = styleHeight
 
 
     this.canvasPosition = this.canvas.getBoundingClientRect()
@@ -231,11 +224,22 @@ export default class Chart {
   /**
    * Redraw the canvas
    */
-  draw(command?: OptionType) {
+  draw(command?: AnyObject) {
     const self = this
-    this.ctx.clearRect(0, 0, this.width, this.width)
+    const ctx = this.ctx
+    ctx.clearRect(0, 0, this.width, this.width)
+
+    let trans = command && command.translate
+    if (trans !== undefined) {
+      ctx.save()
+      ctx.translate(trans.x, trans.y)
+    }
+
     this.layers.draw(command)
-    //console.log(this.layers)
+
+    if (trans !== undefined) {
+      ctx.restore()
+    }
     return this
   }
 }

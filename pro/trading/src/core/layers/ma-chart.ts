@@ -77,10 +77,7 @@ export default class MaChart extends Layer{
     //ctx.save()
     ctx.beginPath()
     maData.forEach((item: any, idx: any) => {
-      let x = 0
-      if (idx > 0) {
-        x = idx * (bodyWidth + gap) + bodyWidth / 4
-      }
+      const x = (idx - layerData.segmentExpandSize) * (bodyWidth + gap) + bodyWidth / 2
 
       let y = self.chart.options.paddingTop
       y += coord.calcHeight((highestLowestPrice[0] - item))

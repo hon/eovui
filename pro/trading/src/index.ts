@@ -10,6 +10,7 @@ function $(id: string) {
   return document.getElementById(id)
 }
 
+
 const prevEl = $('prev')
 const nextEl = $('next')
 const zoomInEl = $('zoom-in')
@@ -17,7 +18,7 @@ const zoomOutEl = $('zoom-out')
 const resetEl = $('reset')
 
 const symbol = '300999'
-const size = 300
+const size = 200
 
 document.getElementById('load-data').addEventListener('click', evt => {
   const symbolEl = document.getElementById('symbol') as HTMLInputElement

@@ -44,7 +44,7 @@ export default class Interaction {
   // on('move-right-over')
   // 鼠标的位置
   mousePosition: {x: number, y: number}
-  isMouseDown: boolean
+  _isMouseDown: boolean = false
 
   // 响应式的时候需要重新设置
   centerPoint: {x: number, y: number}
@@ -63,13 +63,94 @@ export default class Interaction {
 
     this.cachePxOfRu()
 
-    // 鼠标移动事件
-    this.mouseMoveEvent((evt: any) => {})
+    // 拖动
+    this.mouseMoveEvent(this._handleDrag.bind(this))
 
-    this.chart.canvas.addEventListener('mousedown', (evt: any) => {
-      self.isMouseDown = true
-    })
+    this.chart.canvas.addEventListener('mousedown', (evt: MouseEvent) => {
+      self._isMouseDown = true
+    }, false)
+    this.chart.canvas.addEventListener('mouseup', (evt: MouseEvent) => {
+      self._isMouseDown = false
+    }, false)
+
+    let times = {
+      move: 0,
+      zoom: 0,
+    }
+    this.chart.canvas.addEventListener('wheel', this._handleWheel.bind(this, times), false)
+    
   }
+
+  private _handleDrag(evt: any) {
+    // 拖动
+    if (this._isMouseDown) {
+
+    }
+  }
+
+  private _handleWheel(times: AnyObject, evt: WheelEvent) {
+      evt.preventDefault()
+      const coord = this.chart.coordinate
+      const dataView = this.chart.dataView
+      const ruWidthInPx = coord.unitWidthInPx()
+
+
+       // 滚动方向
+      // 1:  向上
+      // -1: 向下
+      // 0:  水平
+      const vDirection = Math.sign(evt.deltaY)
+      // 1:  向右
+      // -1: 向左
+      const hDirection = Math.sign(evt.deltaX)
+
+      /*
+      if (vDirection === 1 || vDirection === -1) {
+        if (hDirection === 0) { // 只有在水平方向滚动为0时，才进行放大缩小操作
+          if (vDirection === 1) {
+            this.zoomOut()
+          } else if (vDirection === -1) {
+            this.zoomIn()
+          }
+        }
+      }
+      */
+
+      // 水平滚动
+      if (vDirection === 0) {
+        // 每次移动一个像素
+        times.move += evt.deltaX
+        // 移动的像素如果大于了一个渲染单位的像素宽度，就移动data view, 然后将移动量清零
+        if (Math.abs(times.move) >= ruWidthInPx) {
+          if (hDirection === 1 && !dataView.isMoveLeftEnd) {
+            this.moveLeft()
+          }
+          if (hDirection === -1 && !dataView.isMoveRightEnd) {
+            this.moveRight()
+          }
+          // 清除移动, 否则translate的值会一直增加
+          times.move = 0
+        } else {
+          const x = -times.move
+          // 以像素为单位移动
+          if (
+            // 在往左移没有结束，而且操作往左
+            (!dataView.isMoveLeftEnd && x < 0)
+            // 或者，往右没有结束，而且操作往右
+            || (!dataView.isMoveRightEnd && x > 0)
+            ) {
+            // 的时候才能以像素为单位移动
+            this.chart.draw({
+              translate: {
+                x,
+                y: 0,
+              }
+            })
+          }
+        }
+      }
+  }
+
 
   /**
    * 缓存渲染单元的像素坐标, 这样就不需要鼠标每移动一次就计算一次，从而提高性能
@@ -93,10 +174,12 @@ export default class Interaction {
   mouseMoveEvent(cb: Function) {
     const self = this
     
-    this.chart.canvas.addEventListener('mousemove', (evt: any) => {
+    this.chart.canvas.addEventListener('mousemove', (evt: MouseEvent) => {
       const mouseX = evt.x - this.chart.canvasPosition.x
       const mouseY = evt.y - this.chart.canvasPosition.y
       const cacheData = self.cacheData
+
+      //console.log(self.isMouseDown)
 
 
       // 像素坐标(x)转换成数据索引
@@ -108,7 +191,7 @@ export default class Interaction {
 
       cacheData.mouseX = mouseX
       cacheData.mouseY = mouseY
-      cacheData.isMouseDown = self.isMouseDown
+      cacheData.isMouseDown = self._isMouseDown
       cacheData.dataIndex = dataIndex
       cacheData.pixelValue = pixelValue
 
@@ -125,6 +208,16 @@ export default class Interaction {
   }
 
 
+  /**
+   * 水平位移
+   */
+  hTranslate(distance: number) {
+
+  }
+
+  /**
+   * 左移数据视图，然后重新渲染
+   */
   moveLeft() {
     this.chart.easyEvent.emit('move-start', {
       detail: {
@@ -170,6 +263,8 @@ export default class Interaction {
     // 将range应用到数据
     layerData.setSegmentRange(this.chart.dataView.indexRange)
 
+    //console.log(layerData.segmentRange)
+
     // 计算最高价和最低价范围
     layerData.calcHighLowRange()
 
@@ -182,11 +277,13 @@ export default class Interaction {
       }
     })
 
+    /*
     layerData.setCacheDataToSegment([{
       renderUnit: 0
     }, {
       renderUnit: 1
     }])
+    */
 
     this.cachePxOfRu()
 
@@ -252,7 +349,14 @@ export default class Interaction {
       // 奇数 - 3 还是偶数
       bodyWidth = floorUnitWidth - 3
     }
-    const gap = unitWidth - bodyWidth
+    let gap = unitWidth - bodyWidth
+    /*
+    if (gap > 1) {
+      //gap -= 1
+      //bodyWidth += 1
+    }
+    console.log(gap)
+    */
     chart.options.renderUnit.width = bodyWidth
     chart.options.renderUnit.gap = gap
 

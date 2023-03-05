@@ -158,7 +158,7 @@ export default class Layers {
 
         // 省略图层数据计算
         if (command && !command.ignoreAlgo) {
-          console.log('ignoreAlgo')
+          //console.log('run algo')
           // 让layerData计算数据
           self.layerData.runAlgo(layer.id)
         }

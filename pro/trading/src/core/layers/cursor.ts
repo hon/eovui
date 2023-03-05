@@ -2,6 +2,8 @@ import { Layer } from './index'
 import Chart from '../chart'
 import { optionsUtil, OptionType } from '@eovui/utils'
 
+const dpr = window.devicePixelRatio
+
 // 游标
 export default class Cursor extends Layer {
   options: OptionType
@@ -39,17 +41,24 @@ export default class Cursor extends Layer {
 
   draw() {
     const ctx = this.chart.ctx
-    // ctx.save()
-    ctx.fillStyle = '#ffffff'
+    ctx.save()
+    ctx.strokeStyle = 'white'
+    ctx.setLineDash([5, 5]);
 
     // 横线
-    ctx.fillRect(0, this.mouseY, this.chart.width, 1)
+    ctx.beginPath();
+    ctx.moveTo(-500, this.mouseY);
+    ctx.lineTo(this.chart.width + 500, this.mouseY);
+    ctx.stroke();
+    
 
     // 纵线
-    ctx.fillRect(this.mouseX - 0.5, 0, 1, this.chart.height)
-
-    // ctx.restore()
-
+    ctx.beginPath();
+    ctx.moveTo(this.mouseX, 0);
+    ctx.lineTo(this.mouseX, this.chart.height);
+    ctx.stroke();
+    
+    ctx.restore()
   }
 
 }

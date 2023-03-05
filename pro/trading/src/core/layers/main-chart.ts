@@ -64,31 +64,26 @@ export default class MainChart extends Layer {
     const ctx = self.chart.ctx
     const layerData = this.chart.layers.layerData
 
-    //console.log(layerData.calcHighLowRange())
 
     // 重新设置可是区域的最高价和最低价
     //layerData.calcHighLowRange()
     const highestLowestPrice = layerData.highLowRange
-    /*
-    coord.updateData({
-      high: highestLowestPrice[0],
-      low: highestLowestPrice[1],
-    })
-    */
     
-    //const highestLowestPrice = layerData.highLowRange
 
     let bodyWidth = this.chart.options.renderUnit.width 
 
     // 每个蜡烛图之间的间距
     let gap = this.chart.options.renderUnit.gap
+        //console.log(bodyWidth)
 
     layerData.data.segment[this.id].forEach((data: any, idx: number) => {
+      if (data === undefined) return
+
       const dataItem = data.ohlc
 
       // 绘制主图
       const drawKline = () => {
-        const bodyOffset = idx * (bodyWidth + gap)
+        const bodyOffset = (idx - layerData.segmentExpandSize) * (bodyWidth + gap)
         // body的顶部，距离表上方的距离
         let bodyTopHeight = self.chart.options.paddingTop
 
@@ -127,6 +122,7 @@ export default class MainChart extends Layer {
         if (dataItem.isBear()) {
           marketType = 'bear'
         }
+
 
         const candleStick = new CandleStick({
           ctx,

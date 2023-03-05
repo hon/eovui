@@ -1,5 +1,4 @@
 // 处理图层数据
-import DataItem, { IDataItem } from "./data-item"
 type IndexRange = [number, number | undefined]
 export class LayerData {
   // 存放各图层的数据
@@ -18,6 +17,12 @@ export class LayerData {
 
   // 数据段区间
   segmentRange: any
+
+  // 数据段向两边扩大的尺寸
+  // 数据段是绘图是所用的数据。为了能够达到一个像素一个像素移动（而不是以渲染单位为步幅移动）的
+  // 目的，需要在可是区域两边预先绘制一定数量的数据，这样就可以通过translate的方式一个像素一个像素
+  // 地移动视图
+  segmentExpandSize: number
 
   // 所有图层的最高最低价区间，坐标系统以此来确定数量和像素的比例
   highLowRange: [number, number]
@@ -42,6 +47,8 @@ export class LayerData {
       // 显示多少条数据
       100
     ]
+
+    this.segmentExpandSize = 2
     this.algos = {}
 
     // dataItems里的最高价和最低价范围
@@ -79,22 +86,59 @@ export class LayerData {
    * @param {Array<any>} range - 数据段的范围
    */
   setSegmentRange(range: IndexRange) {
-    this.segmentRange = range
+    const expandSize = this.segmentExpandSize
+
+    // 修改数据段区间，使其往左扩大数据
+    const first = ((range) => {
+      let result = range[0] - expandSize
+      return result
+    })(range)
+
+    // 修改数据段区间，使其往右扩大数据
+    const last = ((range) => {
+      if (range[1] !== undefined) {
+        let result = range[1] + expandSize
+        // 确保last小于0，否则为undefined
+        if (result >= 0) {
+          result = undefined
+        } 
+        return result
+      }
+    })(range)
+
+    this.segmentRange = [first, last]
     this.segment()
     return this
   }
 
   /**
    * 从所有数据中取出(浅拷贝)一部分, 用于显示和缓存
+   * 如果原始数据（serise）里不够的了，就用undefined填充
    */
   segment() {
+    let first = this.segmentRange[0]
+    const seriseLength = this.serise.length
+    // 超出总数据长度多少数据
+    let overLength = 0
+    // 此时的真实数据已经用完了，没有数据再往数据段里面填充了
+    if (first < - seriseLength) {
+      first = -seriseLength
+      overLength = Math.abs(this.segmentRange[0]) - seriseLength
+    }
+
     for (let [k, v] of Object.entries(this.data.algo)) {
       if (Array.isArray(v)) {
-        this.data.segment[k] = v.slice(this.segmentRange[0], this.segmentRange[1])
+        let slicedData = v.slice(first, this.segmentRange[1])
+        // 超出多少数据，就往数据段里填充多少undefined的数据
+        for (let i = 0; i < overLength; i++) {
+          slicedData.unshift(undefined)
+        }
+        this.data.segment[k] = slicedData
       } else {
         this.data.segment[k] = v
       }
     }
+    
     return this
   }
 
@@ -110,9 +154,13 @@ export class LayerData {
       // 拷贝data
       let data = this.getMainLayerData('segment').slice(0)
       //let highestPrice = data.sort((a: IDataItem, b: IDataItem) => b.high - a.high)[0].high
-      let highestPrice = data.sort((a: any, b: any) => b.ohlc.high - a.ohlc.high)[0].ohlc.high
+      let highestPrice = data
+                        .filter(d => d !== undefined)
+                        .sort((a: any, b: any) => b.ohlc.high - a.ohlc.high)[0].ohlc.high
       //let lowestPrice = data.sort((a: IDataItem, b: IDataItem) => a.low - b.low)[0].low
-      let lowestPrice = data.sort((a: any, b: any) => a.ohlc.low - b.ohlc.low)[0].ohlc.low
+      let lowestPrice = data
+                        .filter(d => d !== undefined)
+                        .sort((a: any, b: any) => a.ohlc.low - b.ohlc.low)[0].ohlc.low
       // 主图层的价格区间
       const mainRange: [number, number] = [highestPrice, lowestPrice]
 
