@@ -39,6 +39,8 @@ export default class Chart {
 
   dataView: DataView
 
+  renderUnit: AnyObject
+
 
   // 主图层的id, 用来确定data serise
   mainLayerId: string
@@ -71,8 +73,8 @@ export default class Chart {
 
       // 渲染单元信息, 主图里面（是蜡烛图)
       renderUnit: {
-        width: 16 / dpr,
-        gap: 2 / dpr,
+        width: 29 / dpr, // 15
+        gap: 8 / dpr, // 2
       },
     }
 
@@ -106,10 +108,10 @@ export default class Chart {
       self.canvasPosition = self.canvas.getBoundingClientRect()
     })
 
+    this.renderUnit = Object.assign({}, this.options.renderUnit)
+
 
     this.initDataView()
-
-    console.log(this.layers)
 
 
   }
@@ -211,7 +213,7 @@ export default class Chart {
 
   // 初始化数据视图
   initDataView() {
-    const viewWidth = Math.floor(this.width / (this.options.renderUnit.width + this.options.renderUnit.gap))
+    const viewWidth = this.width / (this.renderUnit.width + this.renderUnit.gap)
     this.dataView = new DataView({
       totalDataLength: this.layers.layerData.serise.length,
       defaultViewWidth: viewWidth,

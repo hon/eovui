@@ -65,10 +65,10 @@ export default class MaChart extends Layer{
     const highestLowestPrice = layerData.highLowRange
 
     // body的顶部，距离表上方的距离
-    const bodyWidth = self.chart.options.renderUnit.width
+    const bodyWidth = self.chart.renderUnit.width
 
     // 每个蜡烛图之间的间距
-    let gap = self.chart.options.renderUnit.gap
+    let gap = self.chart.renderUnit.gap
     const ctx = self.chart.ctx
 
     const maData = layerData.data.segment[this.id]

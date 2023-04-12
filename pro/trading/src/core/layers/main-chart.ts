@@ -70,10 +70,10 @@ export default class MainChart extends Layer {
     const highestLowestPrice = layerData.highLowRange
     
 
-    let bodyWidth = this.chart.options.renderUnit.width 
+    let bodyWidth = this.chart.renderUnit.width 
 
     // 每个蜡烛图之间的间距
-    let gap = this.chart.options.renderUnit.gap
+    let gap = this.chart.renderUnit.gap
         //console.log(bodyWidth)
 
     layerData.data.segment[this.id].forEach((data: any, idx: number) => {

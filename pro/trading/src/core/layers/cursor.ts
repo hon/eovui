@@ -42,6 +42,7 @@ export default class Cursor extends Layer {
   draw() {
     const ctx = this.chart.ctx
     ctx.save()
+    //ctx.translate(0, 0)
     ctx.strokeStyle = 'white'
     ctx.setLineDash([5, 5]);
 
