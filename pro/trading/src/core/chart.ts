@@ -1,10 +1,10 @@
 import Layers from './layers'
 import Interaction from './interaction'
-import { AnyObject, Evt, optionsUtil, OptionType } from '@eovui/utils'
+import {AnyObject, Evt, optionsUtil, OptionType} from '@eovui/utils'
 import Coordinate from "./render/coordinate";
 import DataView from "./data/data-view";
 
-const dpr = window.devicePixelRatio 
+const dpr = window.devicePixelRatio
 
 /**
  * 主要功能
@@ -33,7 +33,7 @@ export default class Chart {
   stockId: string
 
   // 
-  serise: any 
+  serise: any
 
   coordinate: Coordinate
 
@@ -63,7 +63,7 @@ export default class Chart {
 
     // 默认数据项，当对象初始化时，传入的数据项如果没有设置相关的项，会使用默认配置项。
     const defaultOptions: OptionType = {
-     // canvas元素选择器
+      // canvas元素选择器
       selector: '',
 
       // 图表上方的padding
@@ -80,7 +80,7 @@ export default class Chart {
 
     this.options = optionsUtil.setOptions(defaultOptions, options)
 
-    
+
     const {
       canvas, ctx, width, height, styleWidth,
       styleHeight
@@ -90,7 +90,7 @@ export default class Chart {
 
     this.canvas = canvas
     this.ctx = ctx
-    this.width = width / dpr 
+    this.width = width / dpr
     this.height = height / dpr
 
 
@@ -113,7 +113,6 @@ export default class Chart {
 
     this.initDataView()
 
-
   }
 
 
@@ -127,6 +126,7 @@ export default class Chart {
   initCoordinate() {
     const layerData = this.layers.layerData
     layerData.calcHighLowRange()
+
 
     // 初始化主图的坐标系统
     // 如果在主图里面添加其他股票数据的图层，得在那个图层里面再实例化Coordinate
@@ -152,7 +152,7 @@ export default class Chart {
       offset: {
         // 每项的宽度
         width: this.options.renderUnit.width,
-        
+
         // 每项的间隔
         gap: this.options.renderUnit.gap,
       }
@@ -197,7 +197,7 @@ export default class Chart {
     let height = canvas.height
 
     const styleWidth = width
-    const styleHeight = height 
+    const styleHeight = height
 
     // 解决模糊的问题, 参考：https://www.codingsky.com/doc/2022/4/4/925.html
     const dpr = window.devicePixelRatio;
@@ -219,15 +219,15 @@ export default class Chart {
       defaultViewWidth: viewWidth,
     })
     this.layers.layerData.setSegmentRange(this.dataView.indexRange)
+    console.log(this.dataView.indexRange)
     return this
   }
 
-  
+
   /**
    * Redraw the canvas
    */
   draw(command?: AnyObject) {
-    const self = this
     const ctx = this.ctx
     ctx.clearRect(0, 0, this.width, this.width)
 

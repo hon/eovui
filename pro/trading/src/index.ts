@@ -131,6 +131,35 @@ document.getElementById('load-data').addEventListener('click', evt => {
     ])
 
 
+    // 因为添加了图层，所以要更新坐标系统
+    // 更新坐标系统的功能可以考虑封装到Coordinate中的方法里
+    const updateCoord = (chart: Chart) => {
+      const layerData = chart.layers.layerData
+      // 坐标系统
+      const coord = chart.coordinate
+
+      // 将range应用到数据
+      layerData.setSegmentRange(chart.dataView.indexRange)
+
+
+      // 计算最高价和最低价范围
+      layerData.calcHighLowRange()
+
+      const priceRange = layerData.highLowRange
+      // 更新坐标系统
+      coord.setOptions({
+        highLowRange: {
+          high: priceRange[0],
+          low: priceRange[1],
+        }
+      })
+
+    }
+    updateCoord(chart);
+
+
+
+
     // Step 7: 绘制图表
     chart.draw()
 

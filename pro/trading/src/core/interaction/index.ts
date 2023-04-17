@@ -65,7 +65,7 @@ export default class Interaction {
     const defaultOptions: AnyObject = {
       // coordinateOptions: {},
       // viewOnDataOptions: {},
-      enableSmoothMode: true
+      enableSmoothMode: !true
     }
 
     this.options = optionsUtil.setOptions(defaultOptions, options)
@@ -175,16 +175,88 @@ export default class Interaction {
       // 在dataView里缩放时step的总和
       const stepsPerZoom = 2
 
+
+
+
+      const headOffsetData = renderView.headOffset(x / unitWidth)
+      const tailOffsetData = renderView.tailOffset(x / unitWidth)
+
+
+
+      if (zoomDirection === 'zoom-in') {
+
+        if (headOffsetData.isInt) {
+          // 设置选中索引
+          dataView._trackIndex(-1)
+
+          // 设置indexRange的第一个元素
+          dataView.indexRange = [indexRange[0] + 1, indexRange[1]]
+        }
+
+        if (tailOffsetData.isInt) {
+          let last = indexRange[1]
+          if (tailOffsetData.deltaRuVal < 0) {
+            if (last === undefined) {
+              last = -1
+            } else {
+              last -= 1
+            }
+          }
+          dataView.indexRange = [indexRange[0], last]
+        }
+
+
+        dataView.viewWidth = viewWidth - zoomStep
+
+        // 像素级别的缩放和DataView里缩放的step相等（下同）
+        if (times.zoom % (stepsPerZoom / zoomStep) === 0
+          // 缩放次数不能和上一次的整次数一样
+          && times.zoom != times.prevIntZoom) {
+          // 先还原到上次的viewWidth
+          //dataView.viewWidth += stepsPerZoom
+          // 再进行zoomIn
+          //dataView.zoomIn()
+
+
+          times.prevIntZoom = times.zoom
+        }
+      }
+
+
+      if (zoomDirection === 'zoom-out') {
+        dataView.viewWidth = viewWidth + zoomStep
+
+        if (headOffsetData.isInt) {
+          dataView._trackIndex(1)
+          dataView.indexRange = [indexRange[0] - 1, indexRange[1]]
+        }
+
+        if (tailOffsetData.isInt) {
+          let last = indexRange[1]
+          if (tailOffsetData.deltaRuVal >= 0) {
+            last = undefined
+          } else {
+            if (last !== undefined && last < -1) {
+              last++
+            }
+          }
+          dataView.indexRange = [indexRange[0], last]
+        }
+
+        if (times.zoom % (stepsPerZoom / zoomStep) === 0 && times.zoom != times.prevIntZoom) {
+          //dataView.viewWidth -= stepsPerZoom
+          //dataView.zoomOut()
+          //applyData()
+          times.prevIntZoom = times.zoom
+        }
+      }
       const applyData = () => {
-        //console.log(dataView.selectedIndex, dataView.viewWidth, dataView.indexRange, unitWidth)
         const run = true
         if (run) {
 
-          //x = moveInfo.translate
           // 将range应用到数据
           chart.layers.layerData.setSegmentRange(dataView.indexRange)
 
-          //console.log(x, dataView.viewWidth)
           // 计算最高价和最低价范围
           chart.layers.layerData.calcHighLowRange()
           const priceRange = chart.layers.layerData.highLowRange
@@ -200,65 +272,8 @@ export default class Interaction {
 
       }
 
-
-
-      const headOffsetData = renderView.headOffset(x / unitWidth)
-      const tailOffsetData = renderView.tailOffset(x / unitWidth)
-
-
-
-      console.log(dataView.indexRange, headOffsetData)
-      if (zoomDirection === 'zoom-in') {
-
-        if (headOffsetData.isInt) {
-          // 设置选中索引
-          dataView._trackIndex(-1)
-
-          // 设置indexRange的第一个元素
-          dataView.indexRange = [indexRange[0] + 1, indexRange[1]]
-        }
-
-        if (tailOffsetData.isInt) {
-          dataView.indexRange = [indexRange[0], indexRange[1] + 1]
-        }
-
-
-
-        dataView.viewWidth = viewWidth - zoomStep
-
-        // 像素级别的缩放和DataView里缩放的step相等（下同）
-        if (times.zoom % (stepsPerZoom / zoomStep) === 0
-          // 缩放次数不能和上一次的整次数一样
-          && times.zoom != times.prevIntZoom) {
-          // 先还原到上次的viewWidth
-          //dataView.viewWidth += stepsPerZoom
-          // 再进行zoomIn
-          //dataView.zoomIn()
-
-
-          //applyData()
-          times.prevIntZoom = times.zoom
-        }
-      }
-
-      if (zoomDirection === 'zoom-out') {
-        dataView.viewWidth = viewWidth + zoomStep
-
-
-        if (headOffsetData.isInt) {
-          dataView._trackIndex(1)
-          dataView.indexRange = [indexRange[0] - 1, indexRange[1]]
-        }
-
-        if (times.zoom % (stepsPerZoom / zoomStep) === 0 && times.zoom != times.prevIntZoom) {
-          //dataView.viewWidth -= stepsPerZoom
-          //dataView.zoomOut()
-          //applyData()
-          times.prevIntZoom = times.zoom
-
-        }
-      }
-
+      console.log(dataView.indexRange, tailOffsetData)
+      //applyData()
 
 
       // 的时候才能以像素为单位移动
@@ -422,12 +437,6 @@ export default class Interaction {
   }
 
 
-  /**
-   * 水平位移
-   */
-  hTranslate(distance: number) {
-
-  }
 
   /**
    * 左移数据视图，然后重新渲染
@@ -468,6 +477,9 @@ export default class Interaction {
     return this
   }
 
+  /**
+   * 这里主要更新坐标系统的相关设置
+   */
   updateAfterMove() {
     const chart = this.chart
     const layerData = chart.layers.layerData
