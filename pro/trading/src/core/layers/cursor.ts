@@ -1,8 +1,7 @@
-import { Layer } from './index'
+import {Layer} from './index'
 import Chart from '../chart'
-import { optionsUtil, OptionType } from '@eovui/utils'
+import {AnyObject, optionsUtil, OptionType} from '@eovui/utils'
 
-const dpr = window.devicePixelRatio
 
 // 游标
 export default class Cursor extends Layer {
@@ -24,13 +23,18 @@ export default class Cursor extends Layer {
       this.name = this.options.name
 
       this.chart.canvas.style.cursor = this.options.cursor
+      /*
+      const interaction = this.chart.interaction
 
       const self = this
-      this.chart.interaction.mouseMoveEvent((evt: any) => {
+      interaction.mouseMoveEvent((evt: any) => {
+        const offset = interaction.renderView.offset.head
+        console.log(offset)
         const index = evt.cacheData.dataIndex
-        self.mouseX = evt.cacheData.midPointsOfRu[index]
+        self.mouseX = evt.cacheData.midPointsOfRu[index] + offset
         self.mouseY = evt.cacheData.mouseY
       })
+      */
     }
   }
 
@@ -39,8 +43,14 @@ export default class Cursor extends Layer {
     return this
   }
 
-  draw() {
+  draw(command?: AnyObject) {
     const ctx = this.chart.ctx
+    const interaction = this.chart.interaction
+    const offset = 0 //interaction.renderView.offsetOfPx.head
+    const index = interaction.cacheData.dataIndex
+    const mouseX = interaction.cacheData.midPointsOfRu[index] - offset
+    const mouseY = interaction.cacheData.mouseY
+
     ctx.save()
     //ctx.translate(0, 0)
     ctx.strokeStyle = 'white'
@@ -48,17 +58,16 @@ export default class Cursor extends Layer {
 
     // 横线
     ctx.beginPath();
-    ctx.moveTo(-500, this.mouseY);
-    ctx.lineTo(this.chart.width + 500, this.mouseY);
+    ctx.moveTo(-500, mouseY);
+    ctx.lineTo(this.chart.width + 500, mouseY);
     ctx.stroke();
-    
 
     // 纵线
     ctx.beginPath();
-    ctx.moveTo(this.mouseX, 0);
-    ctx.lineTo(this.mouseX, this.chart.height);
+    ctx.moveTo(mouseX, 0);
+    ctx.lineTo(mouseX, this.chart.height);
     ctx.stroke();
-    
+
     ctx.restore()
   }
 

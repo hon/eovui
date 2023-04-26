@@ -1,5 +1,5 @@
-import { LayerData } from "../data"
-import {OptionType} from "@eovui/utils"
+import {LayerData} from "../data"
+import {OptionType, AnyObject} from "@eovui/utils"
 
 /**
  * 绘制图层, 一个图层一个绘制对象（类似ai）
@@ -70,11 +70,13 @@ export class Layer {
    */
   dataAlgo(data: any) {}
 
+
   /**
    * 往图层上绘制图形
+   * @param {AnyObject} command - 渲染时的命令
    */
-  draw(options?: OptionType) {}
-  
+  draw(command?: AnyObject) {}
+
 }
 /**
  * 图层管理: 管理绘图的顺序
@@ -136,8 +138,6 @@ export default class Layers {
     return undefined
   }
 
-
-
   insertLayer() {}
 
   gotoTop() {}
@@ -158,13 +158,13 @@ export default class Layers {
 
         // 省略图层数据计算
         if (command && !command.ignoreAlgo) {
-          //console.log('run algo')
           // 让layerData计算数据
           self.layerData.runAlgo(layer.id)
         }
 
         // 根据数据绘图图层
-        layer.draw()
+        // 有时候需要对某个图层进行精确控制，所以讲命令传入到图层里
+        layer.draw(command)
       })
   }
 }

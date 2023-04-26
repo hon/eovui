@@ -7,11 +7,11 @@
   "scripts": {
     "test": "jest --watch --config=./../../jest.config.js",
     "dev": "webpack serve --config ./../../scripts/webpack.dev.js",
-    "dev:open": "webpack serve --open --config ./../../scripts/webpack.dev.js"
+    "dev:open": "webpack serve --open --config ./../../scripts/webpack.dev.js",
+    "doc": "npx typedoc --options ./typedoc.json"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "devDependencies": {
-  }
+  "devDependencies": {}
 }

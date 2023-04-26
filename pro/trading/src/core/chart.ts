@@ -219,7 +219,6 @@ export default class Chart {
       defaultViewWidth: viewWidth,
     })
     this.layers.layerData.setSegmentRange(this.dataView.indexRange)
-    console.log(this.dataView.indexRange)
     return this
   }
 

@@ -1,4 +1,4 @@
-import {optionsUtil, AnyObject } from '@eovui/utils'
+import {optionsUtil, AnyObject} from '@eovui/utils'
 
 
 
@@ -37,7 +37,7 @@ export default class Coordinate {
       offset: {
         // 每项的宽度
         width: 0,
-        
+
         // 每项的间隔
         gap: 0,
       }
@@ -72,7 +72,7 @@ export default class Coordinate {
     return Math.round(this.heightAndDataRatio() * dataDistance)
   }
 
-  
+
   /**
    * 根据某个（像素）点y的值，计算对应的数值
   calcDataValue(y: number): number {
@@ -89,8 +89,8 @@ export default class Coordinate {
    * @param {number} dataIndex - 数据索引
    * @return 计算出来的水平值是一个范围
    */
-  calcX(dataIndex: number): Array<number> {
-    const endPoint = this.unitWidthInPx() * (dataIndex + 1)
+  calcX(dataIndex: number, offset?: number): Array<number> {
+    const endPoint = this.unitWidthInPx() * (dataIndex + 1) - (offset === undefined ? 0 : offset)
     const startPoint = endPoint - this.unitWidthInPx()
     const midPoint = startPoint + (this.unitWidthInPx() - this.options.offset.gap) / 2
     return [startPoint, midPoint, endPoint]
@@ -149,7 +149,7 @@ export default class Coordinate {
   pxWidthToRuWidth(width: number): number {
     return Math.floor(width / this.unitWidthInPx())
   }
-  
+
   /**
    * 更新数据
    * 坐标值的计算，有时候要依赖外部数据。当外部数据改变的时候，坐标系统需要知道

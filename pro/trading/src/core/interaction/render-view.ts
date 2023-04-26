@@ -3,17 +3,43 @@
  * 将所有的操作逻辑在这里统一起来。
  * 文件名的由来：因为操作数据的类叫做DataView，因此这里的类叫做RenderView, 表示对渲染后的界面进行
  * 操作。
+ * 这个class的作用是在界面层面上图图表进行移动缩放等, 然后将数据和DataView同步。
+ *
  */
 
 import {AnyObject} from "@eovui/utils";
 import ViewOnData from "../data/data-view";
 
+type ZoomPoint = {
+  distance: number | undefined,
+  dataIndex: number | undefined
+}
+
+type Offset = {
+  head: number,
+  tail: number,
+}
+
 
 export default class RenderView {
   dataView: ViewOnData
 
+
+  // 缩放点距离画布左侧的距离
+  // 在缩放的时候始终是固定的值
+  // 用户鼠标移动或，拖动图标后将该值设置为undefined
+  //zoomPoint: undefined | number
+  zoomPoint: ZoomPoint
+
   // 偏移, 用来存储移动过程中的偏移值
-  offset: AnyObject = {
+  // 以render unit 来计数
+  offset: Offset = {
+    head: 0,
+    tail: 0,
+  }
+
+  // 偏移，以像素来计数
+  offsetOfPx: Offset = {
     head: 0,
     tail: 0,
   }
@@ -27,6 +53,10 @@ export default class RenderView {
 
   constructor(opts: AnyObject) {
     this.dataView = opts.dataView
+    this.zoomPoint = {
+      distance: undefined,
+      dataIndex: undefined,
+    }
   }
 
   private _calc(x: number, deltaRuVal: number, offsetVal: number) {

@@ -65,7 +65,7 @@ export default class Interaction {
     const defaultOptions: AnyObject = {
       // coordinateOptions: {},
       // viewOnDataOptions: {},
-      enableSmoothMode: !true
+      enableSmoothMode: true
     }
 
     this.options = optionsUtil.setOptions(defaultOptions, options)
@@ -88,10 +88,10 @@ export default class Interaction {
     // 拖动
     this.mouseMoveEvent(this._handleDrag.bind(this))
 
-    this.chart.canvas.addEventListener('mousedown', (evt: MouseEvent) => {
+    this.chart.canvas.addEventListener('mousedown', (_evt: MouseEvent) => {
       self._isMouseDown = true
     }, false)
-    this.chart.canvas.addEventListener('mouseup', (evt: MouseEvent) => {
+    this.chart.canvas.addEventListener('mouseup', (_evt: MouseEvent) => {
       self._isMouseDown = false
     }, false)
 
@@ -104,7 +104,8 @@ export default class Interaction {
       // 当滚动次数介于两个整次数直接的时候，此时如果上下滚动会重复出现两次某个整次数
       prevIntZoom: 0,
     }
-    this.chart.canvas.addEventListener('wheel', this._handleWheel.bind(this, times), false)
+
+    this.chart.canvas.addEventListener('wheel', this._handleZoom.bind(this, times), false)
 
   }
 
@@ -115,22 +116,25 @@ export default class Interaction {
     }
   }
 
-  private _handleWheel(times: AnyObject, evt: WheelEvent) {
+  private _handleZoom(times: AnyObject, evt: WheelEvent) {
     evt.preventDefault()
     const coord = this.chart.coordinate
     const dataView = this.chart.dataView
     const ruWidthInPx = coord.unitWidthInPx()
     const cacheData = this.cacheData
-    const self = this
 
 
     const fn = ((zoomDirection: string, times: AnyObject) => {
-      const zoomPoint = cacheData.midPointsOfRu[cacheData.dataIndex]
+      const renderView = this.renderView
+      const zoomPointDistance = renderView.zoomPoint.distance === undefined ?
+        cacheData.midPointsOfRu[cacheData.dataIndex] : renderView.zoomPoint.distance
+      renderView.zoomPoint.distance = zoomPointDistance
+      const zoomPointDataIndex = renderView.zoomPoint.dataIndex === undefined ?
+        cacheData.dataIndex : renderView.zoomPoint.dataIndex
+      renderView.zoomPoint.dataIndex = zoomPointDataIndex
       const chart = this.chart
       const viewWidth = dataView.viewWidth
       const unitWidth = chart.width / viewWidth
-      const renderView = this.renderView
-      const indexRange = dataView.indexRange
       let bodyWidth = Math.floor(unitWidth)
 
       let decimal = unitWidth - bodyWidth
@@ -150,9 +154,9 @@ export default class Interaction {
 
       // 缩放后cacheData.dataIndex距离左侧的距离
       // 这里仅仅从绘制的图形上计算这个距离，底层的数据（dataView）并没有计算
-      const newX = (cacheData.dataIndex + 1) * unitWidth - (bodyWidth / 2) - gap
-      let x = zoomPoint - newX
-
+      //const newX = (cacheData.dataIndex + 1) * unitWidth - (bodyWidth / 2) - gap
+      const newX = (zoomPointDataIndex + 1) * unitWidth - (bodyWidth / 2) - gap
+      let x = zoomPointDistance - newX
 
 
       chart.renderUnit.width = bodyWidth
@@ -170,87 +174,12 @@ export default class Interaction {
 
 
       // 用户界面里缩放时，每次的缩放步幅
-      const zoomStep = .25
+      const zoomStep = 0.25
 
       // 在dataView里缩放时step的总和
       const stepsPerZoom = 2
 
-
-
-
-      const headOffsetData = renderView.headOffset(x / unitWidth)
-      const tailOffsetData = renderView.tailOffset(x / unitWidth)
-
-
-
-      if (zoomDirection === 'zoom-in') {
-
-        if (headOffsetData.isInt) {
-          // 设置选中索引
-          dataView._trackIndex(-1)
-
-          // 设置indexRange的第一个元素
-          dataView.indexRange = [indexRange[0] + 1, indexRange[1]]
-        }
-
-        if (tailOffsetData.isInt) {
-          let last = indexRange[1]
-          if (tailOffsetData.deltaRuVal < 0) {
-            if (last === undefined) {
-              last = -1
-            } else {
-              last -= 1
-            }
-          }
-          dataView.indexRange = [indexRange[0], last]
-        }
-
-
-        dataView.viewWidth = viewWidth - zoomStep
-
-        // 像素级别的缩放和DataView里缩放的step相等（下同）
-        if (times.zoom % (stepsPerZoom / zoomStep) === 0
-          // 缩放次数不能和上一次的整次数一样
-          && times.zoom != times.prevIntZoom) {
-          // 先还原到上次的viewWidth
-          //dataView.viewWidth += stepsPerZoom
-          // 再进行zoomIn
-          //dataView.zoomIn()
-
-
-          times.prevIntZoom = times.zoom
-        }
-      }
-
-
-      if (zoomDirection === 'zoom-out') {
-        dataView.viewWidth = viewWidth + zoomStep
-
-        if (headOffsetData.isInt) {
-          dataView._trackIndex(1)
-          dataView.indexRange = [indexRange[0] - 1, indexRange[1]]
-        }
-
-        if (tailOffsetData.isInt) {
-          let last = indexRange[1]
-          if (tailOffsetData.deltaRuVal >= 0) {
-            last = undefined
-          } else {
-            if (last !== undefined && last < -1) {
-              last++
-            }
-          }
-          dataView.indexRange = [indexRange[0], last]
-        }
-
-        if (times.zoom % (stepsPerZoom / zoomStep) === 0 && times.zoom != times.prevIntZoom) {
-          //dataView.viewWidth -= stepsPerZoom
-          //dataView.zoomOut()
-          //applyData()
-          times.prevIntZoom = times.zoom
-        }
-      }
-      const applyData = () => {
+      const updateCoord = (() => {
         const run = true
         if (run) {
 
@@ -267,19 +196,106 @@ export default class Interaction {
               low: priceRange[1],
             }
           })
-          //self.cachePxOfRu()
+          this.cachePxOfRu()
         }
 
+      }).bind(this)
+
+
+
+      const headOffsetData = renderView.headOffset(x / unitWidth)
+      const tailOffsetData = renderView.tailOffset(x / unitWidth)
+
+
+
+      if (zoomDirection === 'zoom-in') {
+
+        if (headOffsetData.isInt) {
+          // 设置选中索引
+          dataView._trackIndex(-1)
+
+          // 设置indexRange的第一个元素
+          dataView.indexRange = [dataView.indexRange[0] + 1, dataView.indexRange[1]]
+
+          // 只有当indexRange被修改后才更新坐标系统
+          updateCoord()
+
+        }
+
+        if (tailOffsetData.isInt) {
+          let last = dataView.indexRange[1]
+          if (tailOffsetData.deltaRuVal < 0) {
+            if (last === undefined) {
+              last = -1
+            } else {
+              last -= 1
+            }
+          }
+          dataView.indexRange = [dataView.indexRange[0], last]
+          updateCoord()
+        }
+
+
+        dataView.viewWidth = viewWidth - zoomStep
+
+        // 像素级别的缩放和DataView里缩放的step相等（下同）
+        if (times.zoom % (stepsPerZoom / zoomStep) === 0
+          // 缩放次数不能和上一次的整次数一样
+          && times.zoom != times.prevIntZoom) {
+          // 先还原到上次的viewWidth
+          //dataView.viewWidth += stepsPerZoom
+          // 再进行zoomIn
+          //dataView.zoomIn()
+
+          times.prevIntZoom = times.zoom
+        }
       }
 
-      console.log(dataView.indexRange, tailOffsetData)
-      //applyData()
+
+      if (zoomDirection === 'zoom-out') {
+        dataView.viewWidth = viewWidth + zoomStep
+
+        if (headOffsetData.isInt) {
+          dataView._trackIndex(1)
+          //cacheData.dataIndex += 1
+          dataView.indexRange = [dataView.indexRange[0] - 1, dataView.indexRange[1]]
+          updateCoord()
+        }
+
+        if (tailOffsetData.isInt) {
+          let last = dataView.indexRange[1]
+          if (tailOffsetData.deltaRuVal >= 0) {
+            last = undefined
+          } else {
+            if (last !== undefined && last < -1) {
+              last++
+            }
+          }
+          dataView.indexRange = [dataView.indexRange[0], last]
+          updateCoord()
+        }
+
+        if (times.zoom % (stepsPerZoom / zoomStep) === 0 && times.zoom != times.prevIntZoom) {
+          //dataView.viewWidth -= stepsPerZoom
+          //dataView.zoomOut()
+          times.prevIntZoom = times.zoom
+        }
+      }
 
 
-      // 的时候才能以像素为单位移动
+      // 设置renderView.offsetOfPx
+      renderView.offsetOfPx.head = renderView.offset.head * unitWidth
+      renderView.offsetOfPx.tail = renderView.offset.tail * unitWidth
+
+      //cacheData.dataIndex = dataView.selectedIndex
+      // x = headOffsetData.offsetVal * unitWidth
+      cacheData.dataIndex = dataView.selectedIndex
+
+
+      // 以像素为单位移动
       this.chart.draw({
         translate: {
-          x,
+          x: renderView.offsetOfPx.head,
           y: 0,
         }
       })
@@ -295,6 +311,7 @@ export default class Interaction {
     const vDirection = Math.sign(evt.deltaY)
     // 1:  向右
     // -1: 向左
+    // 0:  垂直
     const hDirection = Math.sign(evt.deltaX)
 
 
@@ -323,7 +340,7 @@ export default class Interaction {
 
     // DEBUG
     if (!this.enableSmoothMode) {
-      console.log(this.chart.dataView.selectedIndex, this.chart.dataView.viewWidth, this.chart.dataView.indexRange)
+      //console.log(this.chart.dataView.selectedIndex, this.chart.dataView.viewWidth, this.chart.dataView.indexRange)
       // 水平滚动
       if (vDirection === 0) {
         // 流畅模式
@@ -378,11 +395,13 @@ export default class Interaction {
     const coord = this.chart.coordinate
     const viewWidth = coord.calcDataIndex(this.chart.width)
     const midPoints = []
+    const offset = this.renderView.offsetOfPx.head
     if (this.cacheData === undefined) {
       this.cacheData = {}
     }
+
     for (let i = 0; i < viewWidth; i++) {
-      const x = coord.calcX(i)
+      const x = coord.calcX(i, offset)
       midPoints.push(x[1])
     }
 
@@ -391,22 +410,24 @@ export default class Interaction {
     return this
   }
 
+
+  // 鼠标移动事件
   mouseMoveEvent(cb: Function) {
     const self = this
 
     this.chart.canvas.addEventListener('mousemove', (evt: MouseEvent) => {
+      const offset = this.renderView.offsetOfPx.head
       const mouseX = evt.x - this.chart.canvasPosition.x
       const mouseY = evt.y - this.chart.canvasPosition.y
       const cacheData = self.cacheData
       const dataView = self.chart.dataView
-
-
-      //console.log(self.isMouseDown)
+      const coord = this.chart.coordinate
 
 
       // 像素坐标(x)转换成数据索引
-      const dataIndex = self.chart.coordinate.calcDataIndex(mouseX)
+      const dataIndex = coord.calcDataIndex(mouseX - offset)
       console.log(dataIndex)
+      //console.log(coord.calcX(dataIndex))
 
       // 像素坐标(y)转换成数值
       const pixelValue = self.chart.coordinate.calcDataValue(mouseY)
@@ -424,12 +445,17 @@ export default class Interaction {
       cacheData.percent = mouseX / this.chart.width
 
 
+
       cb && cb({
         event: evt,
         cacheData,
       })
 
       self.chart.draw({
+        translate: {
+          x: offset,
+          y: 0,
+        },
         ignoreAlgo: true
       })
     }, false)

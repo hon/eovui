@@ -1,15 +1,17 @@
+// 根配置文件，被具体的项目里的配置文件继承
 {
   "compilerOptions": {
-    "outDir": "./dist/tsc/",
     "noImplicitAny": true,
     "declaration": true,
     "module": "es6",
     "target": "es2015",
-    "lib": ["ES2019", "DOM"],
+    "lib": [
+      "ES2019",
+      "DOM"
+    ],
     "jsx": "react",
     "sourceMap": true,
     "allowJs": true,
     "moduleResolution": "node"
   }
 }
-
