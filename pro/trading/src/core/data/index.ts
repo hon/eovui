@@ -9,6 +9,7 @@
  * 2. 数据获取
  */
 
+
 /*
 // 证券源数据
 const sourceData = {
@@ -69,8 +70,9 @@ class DataFactory {
 */
 
 
-export { SourceData } from './source-data'
-export { LayerData } from './layer-data'
+export {SourceData} from './source-data'
+export {LayerData} from './layer-data'
+export {default as DataView} from './data-view'
 
 
 

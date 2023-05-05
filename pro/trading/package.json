@@ -8,10 +8,9 @@
     "test": "jest --watch --config=./../../jest.config.js",
     "dev": "webpack serve --config ./../../scripts/webpack.dev.js",
     "dev:open": "webpack serve --open --config ./../../scripts/webpack.dev.js",
-    "doc": "npx typedoc --options ./typedoc.json"
+    "doc": "npx typedoc --options ./typedoc.json && sfz ./docs -p 5002"
   },
   "keywords": [],
   "author": "",
-  "license": "ISC",
-  "devDependencies": {}
+  "license": "ISC"
 }

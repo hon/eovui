@@ -2,7 +2,7 @@ import Layers from './layers'
 import Interaction from './interaction'
 import {AnyObject, Evt, optionsUtil, OptionType} from '@eovui/utils'
 import Coordinate from "./render/coordinate";
-import DataView from "./data/data-view";
+import {DataView} from "./data";
 
 const dpr = window.devicePixelRatio
 

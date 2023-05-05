@@ -86,15 +86,16 @@ export default class Coordinate {
 
   /**
    * 根据数据索引计算像素点x的值
-   * @param {number} dataIndex - 数据索引
+   * @param dataIndex - 数据索引
    * @return 计算出来的水平值是一个范围
    */
-  calcX(dataIndex: number, offset?: number): Array<number> {
-    const endPoint = this.unitWidthInPx() * (dataIndex + 1) - (offset === undefined ? 0 : offset)
+  calcX(dataIndex: number): Array<number> {
+    const endPoint = this.unitWidthInPx() * (dataIndex + 1)
     const startPoint = endPoint - this.unitWidthInPx()
     const midPoint = startPoint + (this.unitWidthInPx() - this.options.offset.gap) / 2
     return [startPoint, midPoint, endPoint]
   }
+
   /**
    * 根据数值（通常是价格）计算像素点y的值
    */

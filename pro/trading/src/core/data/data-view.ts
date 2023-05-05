@@ -1,3 +1,10 @@
+
+import type {AnyObject} from '@eovui/utils'
+import {optionsUtil} from '@eovui/utils'
+
+type IndexRange = [number, number | undefined]
+
+//export default class ViewOnData {
 /**
  * 缩小data serise的范围，并操作。
  * 对图表的放大，缩小，往前，往后，刷新的操作，本质上是对数据进行的相关操作。
@@ -5,71 +12,107 @@
  * 这个类的主要功能就是对DataSerise#data.dataItems进行的放大,缩小,往前,往后,刷新的操作。
  * 操作的结果就是DataSerise#segmentData
  */
+export default class DataView {
 
-import type {AnyObject} from '@eovui/utils'
-import {optionsUtil} from '@eovui/utils'
-type IndexRange = [number, number | undefined]
-
-export default class ViewOnData {
-
+  /** 默认配置项 */
   options: AnyObject
 
-  // the whole data view width
-  // 为了减少和像素转换时的误差，视图宽度可能是个小数
-  // 可以在需要的时候可以用Math.ceil进行取整
+  /** 
+   * ### 数据视图总宽度
+   * 为了减少和像素转换时的误差，视图宽度可能是个小数
+   * 可以在需要的时候可以用取整
+   */
   viewWidth: number
 
-  // 总数据的长度, 如果数据被追加，得更新这个属性
+  /** 总数据的长度, 如果数据被追加，得更新这个属性 */
   totalDataLength: number
 
-  // index range of the whole data (stored in somewhere out side, we do not care ins this Class)
-  _indexRange: IndexRange
+  /**
+   * 相对于整个数据的索引范围
+   */
+  private _indexRange: IndexRange
 
-  // whether the data is moved outside of the view 
-  // isOutOfView: boolean
 
 
-  _indexPercent: number
-  moveStep: number
-  zoomStep: number
+  /**
+   * 当前选中索引相对于可视范围的百分百
+   */
+  // private _indexPercent: number
 
-  // 缩放位置
-  // left: 在可见视图最左侧
-  // center: 在可见视图中间
-  // right: 在可见视图最右侧
+
+  /**
+   * 每次移动多少步数(render unit)
+   * @defaultValue 1
+   */
+  stepsPerMove: number
+
+  /**
+   * 每次缩放多少步数(render unit)
+   * @defaultValue 1
+   */
+  stepsPerZoom: number
+
+  /**
+   * 缩放位置
+   * - left: 在可见视图最左侧
+   * - center: 在可见视图中间
+   * - right: 在可见视图最右侧
+   */
   private _zoomPosition: string
 
 
-  // 是否为固定缩放位置, 如果是固定缩放位置
+  /**
+   * 是否为固定缩放位置。
+   * 1. 如果是，根据_zoomPosition的值进行缩放
+   * 2. 如果否，根据鼠标（或触点）在视图中的位置进行缩放
+   */
   private isFixedPosition: boolean
 
-  // which index is selected relative to the current showing data
+  /**
+   * 选中数据项的索引（相对当前显示数据）
+   * @defaultValue 0
+   */
   private _selectedIndex: number
 
-  // head is the left side of the data serise
-  // there is no data to move right
+
+  /**
+   * `head`是数据的左侧。该属性表示没有数据可以往右侧移动
+   * @defaultValue false
+   */
   private _isMoveRightEnd: boolean
 
-  // tail is the right side of the data serise
-  // there is no data to move left (expect remain minDataLength)
+  /**
+   * `tail`是数据的右侧。该属性表示没有数据可以往左侧移动
+   * @defaultValue false
+   */
   private _isMoveLeftEnd: boolean
   // private _isZoomInEnd: boolean
   // private _isZoomOutEnd: boolean
 
 
-  // 视图中最少剩余多少数据
-  // least data size remain in the view, but if the total data length is smaller than this 
-  // value, then this value will be total data length
+  /**
+   * 视图中至少剩余多少头部数据，如果总的数据长度小于该值，那么该值为数据长度
+   * 如果值为0，则表示viewWidth
+   * @defaultValue 5
+   */
   private _headMinDataLength: number
+
+  /**
+   * 视图中至少剩余多少尾部数据，如果总的数据长度小于该值，那么该值为数据长度
+   * 如果值为0，则表示viewWidth
+   * @defaultValue 5
+   */
   private _tailMinDataLength: number
 
-  // 在计算的过程中有时需要使用操作时上一次的数据，都保持在这里
+  /**
+   * 在计算的过程中有时需要使用操作时上一次的数据，都保持在这里
+   */
   private _prevData: AnyObject
 
 
   constructor(options: AnyObject) {
     const defaultOptions: AnyObject = {
-      // default total data length
+      // 默认数据总长度
       totalDataLength: 0,
 
       // default view width
@@ -90,15 +133,15 @@ export default class ViewOnData {
       minViewWidth: 8,
 
       // how many indexes will be move (when move operation occurs)
-      moveStep: 1,
+      stepsPerMove: 1,
 
       // how may indexes will be move (after the operation of zoom)
-      zoomStep: 1,
+      stepsPerZoom: 1,
 
-      // Define region rangees
-      // left region width: less than and equal to first element(45%) 
-      // center region width: greater than first element(45%) and less than last element(65%)
-      // right region width: greater than and equal to first element(65%)
+      // 定义左，中，右的范围
+      // 左侧区域：小于等于视图宽度的45%
+      // 中部区域：大于视图宽度的45%且小于视图宽度的65%
+      // 右侧区域：大于等于视图宽度的65%
       regionRange: [0.45, 0.65],
 
 
@@ -107,7 +150,6 @@ export default class ViewOnData {
       // 'right' : means zoom from the right side of the (data) view
       // 'center': means zoom from the center point of the (data) view
       zoomPosition: 'center',
-
 
 
       // 是否从固定的位置进行缩放
@@ -153,7 +195,7 @@ export default class ViewOnData {
   }
 
   /**
-   * Some stuffs need to be reset to the initial status
+   * 重置实例状态
    */
   reset() {
     const options = this.options
@@ -166,8 +208,8 @@ export default class ViewOnData {
 
     // 索引范围
     this.indexRange = [-len, undefined]
-    this.moveStep = options.moveStep
-    this.zoomStep = options.zoomStep
+    this.stepsPerMove = options.stepsPerMove
+    this.stepsPerZoom = options.stepsPerZoom
 
 
     // Set the view width
@@ -191,6 +233,10 @@ export default class ViewOnData {
   }
 
 
+  /**
+   * 设置视图中至少剩余多少头部数据
+   * @param length - 剩余数据长度
+   */
   set headMinDataLength(length: number) {
     if (length > this.options.totalDataLength) {
       length = this.options.totalDataLength
@@ -198,6 +244,9 @@ export default class ViewOnData {
     this._headMinDataLength = length
   }
 
+  /**
+   * 获取视图中至少剩余多少头部数据
+   */
   get headMinDataLength() {
     return this._headMinDataLength
   }
@@ -335,15 +384,16 @@ export default class ViewOnData {
 
 
   /**
-   * Track the selected data index after move and zoom
-   * @param {number} step - move step
+   * 当数据视图发生移动或缩放操作后，选中数据会改变，该方法用来跟踪选中数据的index值
+   * @param step - 移动步幅
    */
-  _trackIndex(step: number) {
+  trackIndex(step: number) {
     if (!this.isHeadOutOfView()) {
       this.selectedIndex += 0
     } else {
       this.selectedIndex += step
     }
+    console.log(this.selectedIndex)
     return this
   }
 
@@ -390,7 +440,6 @@ export default class ViewOnData {
    *
    * @param {number} step - move or zoom number
    * @param {string} type - operation type of move and zoom
-   */
   private _setZoomPointByRegion(step: number, type: string) {
     if (this.options.zoomStyle == 'dynamic') {
       let region = 'center'
@@ -420,7 +469,7 @@ export default class ViewOnData {
 
     return this
   }
-
+   */
 
   /**
    * 头部距离视图左侧的距离
@@ -430,7 +479,7 @@ export default class ViewOnData {
   }
 
   /**
-   * Check whether the tail of the data is out if right side of the view
+   * 检查头部数据是否超出了视图左侧
    */
   isHeadOutOfView() {
     return this._headToLeftSideDistance() > 0
@@ -464,7 +513,7 @@ export default class ViewOnData {
 
 
   /**
-   * Check whether the tail of the data is out if right side of the view
+   * 检查尾部数据是否超出了视图右侧
    */
   isTailOutOfView() {
     return this.indexRange[1] !== undefined
@@ -475,33 +524,33 @@ export default class ViewOnData {
    */
   moveLeft() {
     if (!this.isMoveLeftEnd) {
-      const step = this.moveStep
+      const step = this.stepsPerMove
       this.setRange(step, step)
-      return this._trackIndex(step)
+      return this.trackIndex(step)
     }
     return this
   }
 
   moveRight() {
     if (!this.isMoveRightEnd) {
-      const step = this.moveStep
+      const step = this.stepsPerMove
       this.setRange(-step, -step)
-      return this._trackIndex(-step)
+      return this.trackIndex(-step)
     }
     return this
   }
 
   /**
-   * Zoom out of the data view
+   * 放大数据视图
    */
   zoomIn() {
     // 没有放大到最大才能继续放大
     if (this.viewWidth > this.options.minViewWidth) {
-      const step = this.options.zoomStep
+      const step = this.options.stepsPerZoom
 
       // 左右各变化一个step
       this.setViewWidth(this.viewWidth - step * 2)
-      // selectedIndex 为0(在试图左侧)，此时只能移动右侧
+      // selectedIndex 为0(在视图左侧)，此时只能移动右侧
       // 或者缩放位置设置为左侧的时候
       if (this._isLeftPostion()) {
         //console.log('left zoomin')
@@ -517,18 +566,18 @@ export default class ViewOnData {
         //console.log(this.viewWidth)
         // 动态缩放
         return this.setRange(step, -step)
-        //return this._trackIndex(-step)
+        //return this.trackIndex(-step)
       }
-      return this._trackIndex(-step)
+      return this.trackIndex(-step)
     }
     return this
   }
 
   /**
-   * Zoom out of the data view
+   * 缩小数据视图
    */
   zoomOut() {
-    const step = this.options.zoomStep
+    const step = this.options.stepsPerZoom
 
     // 左右各变化一个step
     this.setViewWidth(this.viewWidth + step * 2)
@@ -548,9 +597,9 @@ export default class ViewOnData {
       //console.log(this.viewWidth)
       // 动态缩放
       return this.setRange(-step, step)
-      //return this._trackIndex(step)
+      //return this.trackIndex(step)
     }
-    return this._trackIndex(step)
+    return this.trackIndex(step)
   }
 
   private _isLeftPostion() {
@@ -570,7 +619,7 @@ export default class ViewOnData {
 
 
   /**
-   * Distance of the rangeIndex values
+   * rangeIndex直接的距离
    */
   rangeDistance() {
     const range = this.indexRange
@@ -584,6 +633,10 @@ export default class ViewOnData {
     return result
   }
 
+  /**
+   * 设置indexRange的第一个值
+   * @param value - 设置的值
+   */
   private _setFirst(value: number) {
     let first = value
     // 移动到最左侧或最右侧，保证至少有多少数据在视图内
@@ -609,7 +662,12 @@ export default class ViewOnData {
     return first
   }
 
-  private _setLast(value: number | undefined) {
+  /**
+   * 设置indexRange的最后一个值
+   *
+   * @param value - 设置的值
+   */
+  private _setLast(value: number | undefined): number | undefined {
     let last = value
     // last 如果大于0表示从头开始取，出现大于0的原因是，往左移动时左侧没有超出视图的数据了
     if (value >= 0) {
@@ -624,8 +682,8 @@ export default class ViewOnData {
    * 这里的逻辑比较繁琐，因此需要耐心理解和调试
    * 这里面的移动操作都使用加法运算，在调用setRange方法时，会根据移动的方向传入正负值
    *
-   * @param {number} startStep - 开始的步幅, indexRange第一个值的变化值, 往左是正数，往右是负数 (下同)
-   * @param {number} endStep   - 结束的步幅, indexRange第二个值的变化值
+   * @param startStep - 开始的步幅, indexRange第一个值的变化值, 往左是正数，往右是负数 (下同)
+   * @param endStep   - 结束的步幅, indexRange第二个值的变化值
    */
   setRange(startStep: number, endStep: number) {
 
@@ -644,11 +702,11 @@ export default class ViewOnData {
       // 移动到最左侧或最右侧，保证至少有多少数据在视图内
       const headMinDataLength = this.headMinDataLength
       const tailMinDataLength = this.tailMinDataLength
-
+  
       const totalDataLength = this.totalDataLength
       let first = range[0]
       let last = range[1]
-
+  
       first += startStep
       
       // 当所有的数据都加载完成，此时再继续往右移动的时候，要处理第一个元素的边界问题

@@ -46,9 +46,13 @@ export default class Cursor extends Layer {
   draw(command?: AnyObject) {
     const ctx = this.chart.ctx
     const interaction = this.chart.interaction
-    const offset = 0 //interaction.renderView.offsetOfPx.head
+    const offset = interaction.renderView.offsetOfPx.head
     const index = interaction.cacheData.dataIndex
-    const mouseX = interaction.cacheData.midPointsOfRu[index] - offset
+    let mouseX = interaction.cacheData.midPointsOfRu[index]
+    // 让垂直线始终可见
+    if (offset + mouseX < 0) {
+      mouseX = -offset
+    }
     const mouseY = interaction.cacheData.mouseY
 
     ctx.save()

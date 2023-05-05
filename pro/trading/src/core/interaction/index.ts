@@ -6,20 +6,24 @@
  */
 import Chart from "../chart";
 import {optionsUtil, AnyObject} from '@eovui/utils'
-import RenderView from './render-view'
+import RenderView from '../render/render-view'
 
 export default class Interaction {
   options: AnyObject
   chart: Chart
 
-  // 当进行移动或缩放操作时，将一些数据缓存下来，而不是每次（鼠标移动）都去计算
-  // 这个数据很多都是跟图层数据对应的，但有一些不是，因此没有放到图层数据上面
+  /**
+   * 当进行移动或缩放操作时，将一些数据缓存下来，而不是每次（鼠标移动）都去计算
+   * 这个数据很多都是跟图层数据对应的，但有一些不是，因此没有放到图层数据上面
+   */
   cacheData: AnyObject
 
 
-  // 是否启动流畅模式
-  // 流畅模式是在用户操作图表时以像素为单位进行移动或缩放
-  // 非流畅模式是用户在操作图表是以渲染单位进行图表的移动和缩放操作
+  /**
+   * 是否启动流畅模式
+   * 流畅模式是在用户操作图表时以像素为单位进行移动或缩放
+   * 非流畅模式是用户在操作图表是以渲染单位进行图表的移动和缩放操作
+   */
   enableSmoothMode: boolean
 
 
@@ -65,7 +69,7 @@ export default class Interaction {
     const defaultOptions: AnyObject = {
       // coordinateOptions: {},
       // viewOnDataOptions: {},
-      enableSmoothMode: true
+      enableSmoothMode: !true
     }
 
     this.options = optionsUtil.setOptions(defaultOptions, options)
@@ -142,6 +146,7 @@ export default class Interaction {
       let gap = decimal
 
 
+
       // 小数部分小于0.7
       if (decimal < 0.7) {
         // 则将gap增加1
@@ -172,7 +177,6 @@ export default class Interaction {
       })
 
 
-
       // 用户界面里缩放时，每次的缩放步幅
       const zoomStep = 0.25
 
@@ -196,7 +200,6 @@ export default class Interaction {
               low: priceRange[1],
             }
           })
-          this.cachePxOfRu()
         }
 
       }).bind(this)
@@ -212,7 +215,7 @@ export default class Interaction {
 
         if (headOffsetData.isInt) {
           // 设置选中索引
-          dataView._trackIndex(-1)
+          dataView.trackIndex(-1)
 
           // 设置indexRange的第一个元素
           dataView.indexRange = [dataView.indexRange[0] + 1, dataView.indexRange[1]]
@@ -256,14 +259,14 @@ export default class Interaction {
         dataView.viewWidth = viewWidth + zoomStep
 
         if (headOffsetData.isInt) {
-          dataView._trackIndex(1)
-          //cacheData.dataIndex += 1
+          dataView.trackIndex(1)
           dataView.indexRange = [dataView.indexRange[0] - 1, dataView.indexRange[1]]
           updateCoord()
         }
 
         if (tailOffsetData.isInt) {
           let last = dataView.indexRange[1]
+          // 设置一些特殊的索引值
           if (tailOffsetData.deltaRuVal >= 0) {
             last = undefined
           } else {
@@ -283,6 +286,7 @@ export default class Interaction {
       }
 
 
+
       // 设置renderView.offsetOfPx
       renderView.offsetOfPx.head = renderView.offset.head * unitWidth
       renderView.offsetOfPx.tail = renderView.offset.tail * unitWidth
@@ -291,11 +295,14 @@ export default class Interaction {
       // x = headOffsetData.offsetVal * unitWidth
       cacheData.dataIndex = dataView.selectedIndex
 
+      // 缓存渲染单元的中心点。render-view每变动一次就要缓存一下
+      this.cachePxOfRu()
 
       // 以像素为单位移动
       this.chart.draw({
         translate: {
-          x: renderView.offsetOfPx.head,
+          //x: renderView.offsetOfPx.head,
+          x: renderView.negativeOffsetHead() * unitWidth,
           y: 0,
         }
       })
@@ -376,6 +383,7 @@ export default class Interaction {
             }
           }
         } else {
+          // 非流畅模式
           if (hDirection === 1 && !dataView.isMoveLeftEnd) {
             this.moveLeft()
           }
@@ -385,6 +393,7 @@ export default class Interaction {
         }
       }
     }
+
   }
 
 
@@ -393,18 +402,16 @@ export default class Interaction {
    */
   cachePxOfRu() {
     const coord = this.chart.coordinate
+    // calcDataIndex里会使用Math.floor方法，把chart.width截取一部分
     const viewWidth = coord.calcDataIndex(this.chart.width)
     const midPoints = []
-    const offset = this.renderView.offsetOfPx.head
-    if (this.cacheData === undefined) {
-      this.cacheData = {}
-    }
+
+    this.cacheData = this.cacheData ?? {}
 
     for (let i = 0; i < viewWidth; i++) {
-      const x = coord.calcX(i, offset)
+      const x = coord.calcX(i)
       midPoints.push(x[1])
     }
-
 
     this.cacheData.midPointsOfRu = midPoints
     return this
@@ -416,18 +423,18 @@ export default class Interaction {
     const self = this
 
     this.chart.canvas.addEventListener('mousemove', (evt: MouseEvent) => {
-      const offset = this.renderView.offsetOfPx.head
-      const mouseX = evt.x - this.chart.canvasPosition.x
-      const mouseY = evt.y - this.chart.canvasPosition.y
       const cacheData = self.cacheData
       const dataView = self.chart.dataView
       const coord = this.chart.coordinate
+      const renderView = this.renderView
+      const offset = renderView.negativeOffsetHead() * coord.unitWidthInPx()
+      const mouseX = evt.x - this.chart.canvasPosition.x
+      const mouseY = evt.y - this.chart.canvasPosition.y
 
 
       // 像素坐标(x)转换成数据索引
       const dataIndex = coord.calcDataIndex(mouseX - offset)
       console.log(dataIndex)
-      //console.log(coord.calcX(dataIndex))
 
       // 像素坐标(y)转换成数值
       const pixelValue = self.chart.coordinate.calcDataValue(mouseY)
@@ -659,6 +666,7 @@ export default class Interaction {
         low: priceRange[1],
       }
     })
+
     this.cachePxOfRu()
 
     return this
